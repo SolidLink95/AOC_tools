@@ -1,0 +1,9 @@
+[submodule "DirectXTex"]
+	path = DirectXTex
+	url = https://github.com/microsoft/DirectXTex.git
+[submodule "gust_stuff"]
+	path = gust_stuff
+	url = https://github.com/eArmada8/gust_stuff.git
+[submodule "eternity_common"]
+	path = eternity_common
+	url = https://github.com/eterniti/eternity_common.git

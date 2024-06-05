@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+
+
+*.g1t
+*.g1m
+
+
+/tmp
+/.vscode
+/src/0cc1a2b4
+/src/8279b3ed
+/src/8279b3ed_doa6
+/src/.vscode
+/src/build

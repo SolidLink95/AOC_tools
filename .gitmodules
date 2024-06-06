@@ -7,3 +7,6 @@
 [submodule "eternity_common"]
 	path = eternity_common
 	url = https://github.com/eterniti/eternity_common.git
+[submodule "stb"]
+	path = stb
+	url = https://github.com/nothings/stb.git

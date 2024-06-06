@@ -71,7 +71,6 @@ class G1tFile : public BaseFile
 {
 private:
 
-    std::vector<G1tTexture> textures;
 
     size_t CalculateFileSize() const;
 
@@ -80,6 +79,7 @@ protected:
     void Reset();
 
 public:
+    std::vector<G1tTexture> textures;
 
     std::vector<uint8_t> extra_header;
     std::vector<uint8_t> unk_data;

@@ -1,6 +1,8 @@
 #include "DdsFile.h"
 #include "Utils.h"
 #include "debug.h"
+#include "../stb/stb_image.h"
+#include <stdexcept>
 
 #include "dxgi_str.h"
 
@@ -473,4 +475,33 @@ std::string DdsFile::GetFormatName(int format)
     }
 
     return ret;
+}
+
+
+
+std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt) {
+     int width, height, channels;
+    stbi_uc* data = stbi_load_from_memory(pngData.data(), pngData.size(), &width, &height, &channels, 0);
+    if (!data) {
+        throw std::runtime_error("Failed to load PNG image");
+    }
+
+    DDSHeader ddsHeader;
+    ddsHeader.width = width;
+    ddsHeader.height = height;
+    ddsHeader.mip_map_count = mipMapCount;
+    ddsHeader.pitch_or_linear_size = width * height * channels;
+    ddsHeader.pf.flags = (channels == 4) ? DDS_PF_ALPHAPIXELS : DDS_PF_RGB;
+    ddsHeader.pf.rgb_bit_count = channels * 8;
+    ddsHeader.pf.r_mask = 0x00FF0000;
+    ddsHeader.pf.g_mask = 0x0000FF00;
+    ddsHeader.pf.b_mask = 0x000000FF;
+    ddsHeader.pf.a_mask = (channels == 4) ? 0xFF000000 : 0;
+
+    std::vector<uint8_t> ddsData(sizeof(DDSHeader) + width * height * channels);
+    memcpy(ddsData.data(), &ddsHeader, sizeof(DDSHeader));
+    memcpy(ddsData.data() + sizeof(DDSHeader), data, width * height * channels);
+
+    stbi_image_free(data);
+    return ddsData;
 }

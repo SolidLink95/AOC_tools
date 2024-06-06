@@ -205,6 +205,11 @@ public:
 
     static std::string GetFormatName(int format);
     inline std::string GetFormatName() { return GetFormatName(format); }
+    void DisplayInfo() const;
 };
+std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt);
+// std::vector<uint8_t> convertDdsData(const std::vector<uint8_t>& ddsData, int mipMapCount, int width, int height, int formatInt);
+// std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt);
+
 
 #endif // DDSFILE_H

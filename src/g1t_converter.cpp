@@ -8,6 +8,8 @@
 // #include "../DirectXTex/DirectXTex/DirectXTex.h"
 #include <filesystem>
 #include <unordered_map>
+#include "../stb/stb_image.h"
+
 
 struct G1tRecord
 {
@@ -127,23 +129,28 @@ bool dirToG1t(const std::string &path)
         return false;
     }
     G1tFile g1t;
-    std::string g1t_csv_path = path + "/g1t.txt";
+    std::string g1t_csv_path = path + "\\g1t.txt";
     if (!std::filesystem::exists(g1t_csv_path))
     {
         std::cerr << "g1t.txt not found in directory: " << path << std::endl;
         return false;
     }
     std::unordered_map<std::string, G1tRecord> records = parseG1tCsv(g1t_csv_path);
+    
+    if (records.empty())
+    {
+        std::cerr << "g1t.txt is empty or couldn't be parsed: " << g1t_csv_path << std::endl;
+        return false;
+    }
+
     for (const auto &file : files)
     {
+        if (strcmp(file.c_str(), g1t_csv_path.c_str()) == 0) continue;
         std::vector<uint8_t> rawdata;
-        if (isDdsFile(file)) {
+        if (isValidImagePath(file)) {
             rawdata = FileToBytes(file);
-        } else if (isPngFile(file)) {
-            //todo, convert to dds
-            continue; 
         } else {
-            std::cerr << "Invalid file: " << file << std::endl;
+            std::cerr << "Invalid file, not png nor dds: " << file << std::endl;
             continue;
         }
         std::string key = getBaseNameWithoutExtension(file);
@@ -152,23 +159,39 @@ bool dirToG1t(const std::string &path)
             continue;
         }
         if (records.find(key) != records.end()) {
+            G1tRecord rec = records[key];
+            if (isPngFile(file))
+                rawdata = createDdsDataFromPngData(rawdata, rec.mips, rec.format);
+            // DdsFile dds(rec.format, rec.width, rec.height, rec.mips, rawdata.data(), rawdata.size());
+            DdsFile dds;
+            // dds.LoadFromFile(file);
+            if (!dds.Load(rawdata.data(), rawdata.size())) {
+                std::cerr << "Failed to load dds/png file: " << file << std::endl;
+                continue;
+            }
+            std::cout << "Adding dds: " << dds.GetWidth() << "x" << dds.GetHeight() << " format: " << dds.GetFormatName() << " mips: " << dds.GetMips() << std::endl; 
+            G1tTexture tex;
+            if (!G1tFile::FromDDS(tex, dds, nullptr, nullptr)) {
+                std::cerr << "Failed to convert: " << std::endl;
+                // dds.DisplayInfo();
+                continue;
+            }
+            g1t.textures.push_back(tex);
+            
             //found key
         } else {
             std::cout << "Key not found in g1t.txt, skipping: " << key << std::endl;
         }
     }
-    // for (const auto& line: g1t_csv) {
-    //     std::vector<std::string> parts = SplitString(line, ';');
-    //     if (parts.size() != 6) {
-    //         std::cerr << "Invalid g1t.txt line: " << line << std::endl;
-    //         return false;
-    //     }
-    //     int ind = std::stoi(parts[0]);
-    //     int width = std::stoi(parts[1]);
-    //     int height = std::stoi(parts[2]);
-    //     int format = std::stoi(parts[4]);
-    //     int mips_count = std::stoi(parts[5]);
-    // }
+    if (g1t.textures.empty()) {
+        std::cerr << "No textures could be added to g1t file: "  << std::endl;
+        return false;
+    }
+    std::string out_path = path + ".g1t";
+    if (!g1t.SaveToFile(out_path, true, false)) {
+        std::cerr << "Failed to save g1t file: " << out_path << std::endl;
+        return false;
+    }
 
     return true;
 }
@@ -178,10 +201,10 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         print_usage(argv);
-        for (const auto &file : listDir("./8279b3ed"))
-        {
-            std::cout << file << std::endl;
-        }
+        // for (const auto &file : listDir("./8279b3ed"))
+        // {
+        //     std::cout << file << std::endl;
+        // }
         return 1;
     }
     std::string path = argv[1];
@@ -202,6 +225,15 @@ int main(int argc, char *argv[])
     else if (std::filesystem::is_directory(path))
     {
         std::cout << "Packing directory" << std::endl;
+        if (!dirToG1t(path)) {
+            std::cout << "Failure" << std::endl;
+            return 1;
+        }
+        else
+        {
+            std::cout << "Success" << std::endl;
+            return 0;
+        }
     }
     else
     {

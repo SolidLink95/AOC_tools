@@ -15,8 +15,8 @@ void print_usage(char *argv[])
 int process_g1m(std::string &file1, std::string &oid_file, std::string &file2, G1mFile &g1m, bool var1)
 {
     std::cout << "Loading file " << file1 << std::endl;
-    var1 &= g1m.SmartLoad(file1);
-    if (!var1)
+    std::string destfile = file1 + ".xml";
+    if (!g1m.SmartLoad(file1))
     {
         std::cerr << "Failed to load file " << file1 << std::endl;
         return 1;
@@ -26,19 +26,12 @@ int process_g1m(std::string &file1, std::string &oid_file, std::string &file2, G
     g1m.SetDefaultBoneNames();
     std::cout << "Default bones names set " << std::endl;
     // var3 = g1m.SmartSave(file2, true, true);
-    TiXmlDocument *doc = g1m.Decompile();
-    if (!doc)
-    {
-        std::cerr << "Failed to decompile file " << file1 << std::endl;
+    if (!g1m.SmartSave(destfile, true, false)) {
+        
+        std::cerr << "Failed to save file " << destfile << std::endl;
         return 1;
     }
-    std::cout << "Loaded  TiXmlDocument" << std::endl;
-    var1 &= doc->SaveFile(file2.c_str());
-    if (!var1)
-    {
-        std::cerr << "Failed to save xml file " << std::endl;
-        return 1;
-    }
+    
     return 0;
 }
 

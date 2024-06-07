@@ -11,6 +11,47 @@
 #include "FilesOperations.h"
 #include "Utils.h"
 
+
+std::string TiXmlDocumentToString(TiXmlDocument doc) {
+    // Redirect stdout to a temporary file
+    FILE* temp = tmpfile();
+    if (temp == nullptr) {
+        perror("tmpfile");
+        exit(EXIT_FAILURE);
+    }
+
+    int stdout_fd = dup(STDOUT_FILENO);
+    if (stdout_fd == -1) {
+        perror("dup");
+        exit(EXIT_FAILURE);
+    }
+
+    if (dup2(fileno(temp), STDOUT_FILENO) == -1) {
+        perror("dup2");
+        exit(EXIT_FAILURE);
+    }
+
+    // Example output to stdout
+    doc.Print();
+
+    // Restore stdout
+    fflush(stdout);
+    dup2(stdout_fd, STDOUT_FILENO);
+    close(stdout_fd);
+
+    // Read from the temporary file
+    fseek(temp, 0, SEEK_SET);
+    std::stringstream ss;
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), temp) != nullptr) {
+        ss << buffer;
+    }
+    fclose(temp);
+
+    return ss.str();
+}
+
+
 bool TextToBinary(const std::string& path) {
     std::vector<uint8_t> res;
     std::string dest_file;
@@ -51,15 +92,27 @@ std::string BinaryToText(const std::vector<uint8_t> &data, const std::string &pa
     if (kdb.Load(data.data(), data.size())) {
         std::cout << "Loaded KDB file " << std::endl;
         TiXmlDocument *doc = kdb.Decompile();
-        if (doc != nullptr){
-            if (doc->SaveFile((path + ".xml").c_str())) {
-                std::cout << "Saved KDB to XML" << std::endl;
-                exit(0);
-            }
-        }
-        else {
+        if (doc) {
+            res = TiXmlDocumentToString(*doc);
+            delete doc; // Ensure proper cleanup
+        } else {
             std::cerr << "Failed to decompile KDB file" << std::endl;
         }
+        if (!res.empty()) {
+            std::cout << "Converted KDB" << std::endl;
+            return res;
+        } else {
+            std::cerr << "Failed to save KDB to string" << std::endl;
+        }
+        // if (doc != nullptr){
+        //     if (doc->SaveFile((path + ".xml").c_str())) {
+        //         std::cout << "Saved KDB to XML" << std::endl;
+        //         exit(0);
+        //     }
+        // }
+        // else {
+        //     std::cerr << "Failed to decompile KDB file" << std::endl;
+        // }
     }
     KtidFile ktid;
     if (ktid.Load(data.data(), data.size()))

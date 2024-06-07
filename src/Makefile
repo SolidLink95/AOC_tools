@@ -14,7 +14,7 @@ OBJS += KtidFile.o MtlFile.o  ../eternity_common/DOA6/KidsObjDBFile.o
 
 CFLAGS=-Wall -I. -I../eternity_common  -std=gnu99 -O2 
 CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb  -O2 -std=c++17 -DTIXML_USE_STL -static 
-LDFLAGS=-L. -ld3d9 -ld3dx9 -L../lib -lDirectXTex
+LDFLAGS=-L. -ld3d9 -ld3dx9 -L../lib #-lDirectXTex
 LIBS = -lstdc++ -lz -lversion -ld3dx9
 
 all: $(OUTPUT1) $(OUTPUT2) $(OUTPUT3)

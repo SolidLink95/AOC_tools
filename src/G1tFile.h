@@ -91,6 +91,8 @@ public:
     G1tFile();
     virtual ~G1tFile() override;
 
+    std::string GetMetadataCsv() const;
+
     virtual bool Load(const uint8_t *buf, size_t size) override;
     virtual uint8_t *Save(size_t *psize) override;
 

@@ -32,8 +32,8 @@
 *.app
 
 
-*.g1t
-*.g1m
+# *.g1t
+# *.g1m
 
 
 /tmp
@@ -44,3 +44,9 @@
 /src/.vscode
 /src/build
 /src/tmp
+
+# submodules
+/stb
+/gust_stuff
+/eternity_common
+/DirectXTex

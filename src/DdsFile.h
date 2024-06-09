@@ -191,7 +191,7 @@ public:
 
     virtual bool Load(const uint8_t *buf, size_t size) override;
     virtual uint8_t *Save(size_t *psize) override;
-
+    std::vector<uint8_t> ToBytes();
     uint32_t *Decode(bool *alpha) const;
 
     inline uint32_t GetWidth() const { return header.width; }

@@ -137,6 +137,7 @@ public:
     static int DdsToG1tFormat(int dds_fmt);
 
     static int IdealMipsCount(int width, int height);
+    std::string G1tFile::GetMetadataCsv();
 };
 
 #endif // G1TFILE_H

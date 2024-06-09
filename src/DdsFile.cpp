@@ -215,6 +215,13 @@ uint8_t *DdsFile::Save(size_t *psize)
     return buf;
 }
 
+std::vector<uint8_t> DdsFile::ToBytes() {
+    size_t size;
+    uint8_t* data = Save(&size);
+    std::vector<uint8_t> bytes(data, data + size);
+    return bytes;
+}
+
 bool DdsFile::DecodeB8G8R8X8(uint32_t *dec, bool *alpha) const
 {
     uint32_t dim = header.width * header.height;

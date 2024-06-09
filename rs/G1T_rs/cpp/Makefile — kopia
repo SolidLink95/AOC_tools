@@ -1,0 +1,22 @@
+# Variables
+#bindgen cpp/G1tLib.h -o src/bindings.rs -- -I../../../src -I../../../eternity_common
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -O2
+INCLUDES = -I../../../src -I../../../eternity_common 
+LIB_NAME = ../lib/G1tLib.lib
+
+# Files
+SRCS = G1tLib.cpp
+OBJS = $(SRCS:.cpp=.o)
+
+# Rules
+all: $(LIB_NAME)
+
+$(LIB_NAME): $(OBJS)
+	ar rcs $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(LIB_NAME)

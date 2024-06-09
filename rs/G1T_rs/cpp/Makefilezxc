@@ -1,0 +1,22 @@
+
+# Variables
+CXX = cl
+CXXFLAGS = /EHsc /MD /O2 /I../../../src /I../../../eternity_common -I"C:/Program Files/zlib/include" /D "BUILDING_G1TLIB"
+LIB = lib
+LIBFLAGS = /OUT:../lib/G1tLib.lib
+
+# Files
+SRCS = G1tLib.cpp
+OBJS = $(SRCS:.cpp=.obj)
+
+# Rules
+all: ../lib/G1tLib.lib
+
+../lib/G1tLib.lib: $(OBJS)
+	$(LIB) $(LIBFLAGS) $(OBJS)
+
+%.obj: %.cpp
+	$(CXX) $(CXXFLAGS) /c $< /Fo$@
+
+clean:
+	del $(OBJS) ../lib/G1tLib.lib

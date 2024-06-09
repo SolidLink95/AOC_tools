@@ -1,0 +1,7 @@
+[package]
+name = "G1tTestRs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+G1T_rs ={ path = "../G1T_rs"}

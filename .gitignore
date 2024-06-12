@@ -50,3 +50,8 @@
 /gust_stuff
 /eternity_common
 /DirectXTex
+
+# rs
+/target
+/py/*/*/target
+/py/*/*/.venv

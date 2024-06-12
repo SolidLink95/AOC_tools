@@ -1,7 +1,8 @@
 import io
 from pathlib import Path
-import g1t_module
+import cpp.g1t_module as g1t_module
 import hashlib
+from Dds_rs import png_to_dds, dds_to_png
 
 def fileToMd5(file):
     return bytesToMd5(Path(file).read_bytes())

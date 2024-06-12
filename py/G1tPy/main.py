@@ -1,7 +1,11 @@
-import g1t_module
+import cpp.g1t_module as g1t_module
 from pathlib import Path
 from G1t import G1T, fileToMd5
 import os
+from Dds_rs import png_to_dds, dds_to_png
+import sys
+
+sys.exit("dziala")
 
 
 van = Path("0cc1a2b4_bak.g1t")

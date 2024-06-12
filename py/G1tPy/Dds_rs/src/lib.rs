@@ -166,7 +166,7 @@ fn dds_to_dds(dds_data: Vec<u8>, format: &str, mipmaps_count: u32, width: u32, h
 }
 
 #[pymodule]
-fn png_to_dds_module(py: Python, m: &PyModule) -> PyResult<()> {
+fn Dds_rs(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(png_to_dds, m)?)?;
     m.add_function(wrap_pyfunction!(dds_to_dds, m)?)?;
     Ok(())

@@ -1,0 +1,23 @@
+{
+    "json_version": 2,
+    "platform": 10,
+    "textures": [
+        {
+            "flags": [
+                34,
+                115,
+                32,
+                0,
+                0
+            ],
+            "format": 95,
+            "format_name": "BC7_UNORM",
+            "height": 512,
+            "mipmaps": 8,
+            "name": "0.dds",
+            "sys": 0,
+            "width": 512
+        }
+    ],
+    "version": 808465968
+}

@@ -3,6 +3,7 @@
 #include "G1tFile.h"
 #include "debug.h"
 #include "Utils.h"
+#include <json/json.h>
 
 static const std::vector<std::pair<int, int>> g1t_to_dxgi_lookup =
 {
@@ -336,32 +337,6 @@ void G1tFile::Reset()
     unk_1C = 0;
 }
 
-uint32_t G1tFile::val32(uint32_t val) const
-{
-#ifdef __BIG_ENDIAN__
-	return (big_endian) ? val : LE32(val)
-#else
-	return (big_endian) ? BE32(val) : val;
-#endif
-}
-
-uint8_t *G1tFile::GetOffsetPtr(const void *base, uint32_t offset, bool native) const
-{
-	if (native)
-		return ((uint8_t *)base+offset);
-
-	return ((uint8_t *)base+val32(offset));
-}
-
-uint8_t *G1tFile::GetOffsetPtr(const void *base, const uint32_t *offsets_table, uint32_t idx, bool native) const
-{
-	if (native)
-		return ((uint8_t *)base+offsets_table[idx]);
-	
-	return ((uint8_t *)base+val32(offsets_table[idx]));
-}
-
-
 bool G1tFile::Load(const uint8_t *buf, size_t size)
 {
     Reset();
@@ -484,13 +459,15 @@ bool G1tFile::Load(const uint8_t *buf, size_t size)
 size_t G1tFile::CalculateFileSize() const
 {
     size_t size = sizeof(G1THeader) + extra_header.size() + (textures.size() * 4) + unk_data.size();
-
+    printf("asdf1\n");
     for (const G1tTexture &tex : textures)
-    {
+    {   
+        printf("asdf2\n");
         size += sizeof(G1TEntryHeader);
-
+printf("asdf3\n");
         if (tex.extra_header_version > 0)
         {
+
             const G1TEntryHeader2 *ehdr2 = (const G1TEntryHeader2 *)tex.extra_header.data();
             size += ehdr2->size;
         }
@@ -503,9 +480,10 @@ size_t G1tFile::CalculateFileSize() const
 
 uint8_t *G1tFile::Save(size_t *psize)
 {
+    printf("unk_1C: 0x%X\n", unk_1C);
     *psize = CalculateFileSize();
     uint8_t *buf = new uint8_t[*psize];
-
+    
     memset(buf, 0, *psize);
 
     G1THeader *hdr = (G1THeader *)buf;
@@ -522,7 +500,7 @@ uint8_t *G1tFile::Save(size_t *psize)
     hdr->plattform = plattform;
     hdr->unk_data_size = (uint32_t)unk_data.size();
     hdr->unk_1C = unk_1C;
-
+    printf("Savinf unk_1C: 0x%X\n", unk_1C);
     if (extra_header.size() > 0)
         memcpy(extra_header_ptr, extra_header.data(), extra_header.size());
 
@@ -557,6 +535,9 @@ uint8_t *G1tFile::Save(size_t *psize)
 
         uint8_t wlog = (uint8_t)log2(tex.width);
         uint8_t hlog = (uint8_t)log2(tex.height);
+        // for (int x = 0; x < 4; x++)
+        //     ehdr->unk_3[x] = tex.unk_3[x];
+        // ehdr->extra_header_version = tex.extra_header_version;
 
         if ((wlog > 0xF || hlog > 0xF) && tex.extra_header.size() < 0x14)
         {
@@ -567,7 +548,8 @@ uint8_t *G1tFile::Save(size_t *psize)
 
         ehdr->dxdy = wlog | (uint8_t)(hlog << 4);
         memcpy(ehdr->unk_3, tex.unk_3, sizeof(tex.unk_3));
-        ehdr->extra_header_version = tex.extra_header_version;
+        // ehdr->extra_header_version = tex.extra_header_version;
+        ehdr->extra_header_version = 0x12;
 
         if (tex.extra_header_version > 0)
         {
@@ -577,7 +559,8 @@ uint8_t *G1tFile::Save(size_t *psize)
 
             memcpy(ehdr2, ehdr2_in, ehdr2_in->size);
 
-            if (ehdr2->size >= 0xC)
+            // if (ehdr2->size >= 0xC)
+            if (ehdr2->size > 0xC)
             {
                 if (tex.array_size > 0xF)
                 {
@@ -1092,4 +1075,85 @@ std::vector<uint8_t> G1tFile::ToBytes() {
     std::vector<uint8_t> bytes(buf, buf + size);
     delete[] buf;
     return bytes;
+}
+
+std::string G1tFile::GetMetadataJson() {
+    Json::Value res;
+    res["json_version"] = 0x2;
+    // res["name"] = "0cc1a2b4.g1t";
+    res["version"] = version;
+    res["platform"] = plattform;
+    res["unk_1C"] = unk_1C;
+    int i = 0;
+    for (G1tTexture& tex: textures) {
+        DdsFile *dds = G1tFile::ToDDS(tex);
+        Json::Value tex_json;
+        tex_json["name"] = std::to_string(i) + ".dds";
+        tex_json["width"] = tex.width;
+        tex_json["height"] = tex.height;
+        tex_json["format"] = tex.format;
+        tex_json["format_name"] = dds->GetFormatName();
+        tex_json["mipmaps"] = tex.mips;
+        tex_json["extra_header_version"] = tex.extra_header_version;
+        Json::Value extra_header;
+        for (int k = 0; k < tex.extra_header.size(); k++) {
+            extra_header.append(tex.extra_header[k]);
+        }
+        Json::Value flags;
+        for (int k = 0; k < 4; k++) {
+            flags.append(tex.unk_3[k]);
+        }
+        flags.append(tex.extra_header_version);
+        tex_json["flags"] = flags;
+        tex_json["extra_header"] = extra_header;
+        tex_json["sys"] = tex.sys;
+        // tex_json["array_size"] = tex.array_size;
+        // tex_json["extra_header_version"] = tex.extra_header_version;
+        // tex_json["unk_3"] = Utils::BytesToHexString(tex.unk_3, sizeof(tex.unk_3));
+        // tex_json["image_data_size"] = tex.image_data.size();
+        res["textures"].append(tex_json);
+        delete dds;
+
+    }
+    Json::StreamWriterBuilder writer;
+    return Json::writeString(writer, res);
+}
+
+uint32_t swap_bytes(uint32_t value) {
+    // Extract individual bytes
+    uint32_t byte0 = (value >> 24) & 0xFF; // Most significant byte
+    uint32_t byte1 = (value >> 16) & 0xFF;
+    uint32_t byte2 = (value >> 8) & 0xFF;
+    uint32_t byte3 = value & 0xFF; // Least significant byte
+
+    // Reassemble them in the desired order
+    uint32_t result = (byte3 << 24) | (byte2 << 16) | (byte1 << 8) | byte0;
+
+    return result;
+}
+
+
+uint8_t *G1tFile::GetOffsetPtr(const void *base, uint32_t offset, bool native) const
+{
+	if (native)
+		return ((uint8_t *)base+offset);
+
+	return ((uint8_t *)base+val32(offset));
+}
+
+uint8_t *G1tFile::GetOffsetPtr(const void *base, const uint32_t *offsets_table, uint32_t idx, bool native) const
+{
+	if (native)
+		return ((uint8_t *)base+offsets_table[idx]);
+	
+	return ((uint8_t *)base+val32(offsets_table[idx]));
+}
+
+uint32_t G1tFile::val32(uint32_t val) const
+{
+#ifdef __BIG_ENDIAN__
+	return (big_endian) ? val : LE32(val)
+#else
+	return (big_endian) ? BE32(val) : val;
+#endif
 }

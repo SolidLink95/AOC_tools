@@ -11,8 +11,26 @@
 #include <thread>
 #include <chrono>
 #include <sstream>
+#include <json/json.h>
 
 namespace py = pybind11;
+
+bool ValidateJsonData(Json::Value& data) {
+    std::vector<std::string> keys = {"version", "platform", "textures"};
+    for( const auto& key : keys ) {
+        if (!data.isMember(key)) {
+            std::cerr << "Invalid key in json: " << key << std::endl;
+            return false;
+        }
+    }
+    if (!data["textures"].isArray()) {
+        std::cerr << "textures key is not an array" << std::endl;
+        return false;
+    }
+    
+    return true;
+}
+
 
 // Forward declare the functions
 std::tuple<std::string, std::vector<std::vector<uint8_t>>> G1tDecompile(std::vector<uint8_t> &g1t_data) {
@@ -21,9 +39,9 @@ std::tuple<std::string, std::vector<std::vector<uint8_t>>> G1tDecompile(std::vec
     if (!g1t.Load(g1t_data.data(), g1t_data.size())) {
         return std::make_tuple("Error loading g1t data", dds_data);
     }
-    
-    std::cout << "hdr->version: " << g1t.version << std::endl;
-    std::cout << "hdr->plattform: " << g1t.plattform << std::endl;
+    printf("Loaded unk_1c: 0x%X\n", g1t.unk_1C);
+    // std::cout << "hdr->version: " << g1t.version << std::endl;
+    // std::cout << "hdr->plattform: " << g1t.plattform << std::endl;
 
     size_t i = 0;
     size_t size = g1t.GetNumTextures();
@@ -39,41 +57,109 @@ std::tuple<std::string, std::vector<std::vector<uint8_t>>> G1tDecompile(std::vec
         delete dds;
         i++;
     }
-    std::string metadata = g1t.GetMetadataCsv();
+    // std::string metadata = g1t.GetMetadataCsv();
+    std::string metadata = g1t.GetMetadataJson();
     return std::make_tuple(metadata, dds_data);
 }
 
-std::vector<uint8_t> G1tCompile(std::vector<std::vector<uint8_t>> &dds_data) {
+std::vector<uint8_t> G1tCompile(std::vector<std::vector<uint8_t>> &dds_data, const std::string& metadata) {
+    std::cout << "G1tCompile metadata: " << metadata << std::endl;
+    Json::CharReaderBuilder builder;
+    Json::CharReader* reader = builder.newCharReader();
+    Json::Value json_data;
+    std::string errs;
+    bool parsingSuccess = reader->parse(metadata.c_str(), metadata.c_str() + metadata.size(), &json_data, &errs);
+    delete reader;
+    if (!parsingSuccess) {
+        std::cerr << "Failed to parse metadata: " << errs << std::endl;
+        return std::vector<uint8_t>();
+    }
+    if (!ValidateJsonData(json_data)) {
+        return std::vector<uint8_t>();
+    }
+
+
     G1tFile g1t;
+    g1t.plattform = json_data["platform"].asUInt(); //Windows
+    g1t.unk_1C = json_data["unk_1C"].asUInt(); //Windows
+    g1t.version = json_data["version"].asUInt();
+    if (dds_data.size() != json_data["textures"].size()) {
+        std::cerr << "Mismatch between number of textures and dds data" << std::endl;
+        return std::vector<uint8_t>();
+    }
+    // g1t.version = 0x30303630;
     // std::vector<uint8_t> bytes;
     int i = 0;
     std::stringstream ss;
+    std::cout << "parsing textures..." << std::endl;
     for (auto& dds_bytes: dds_data) {
+        printf("asdf1\n");
+        Json::Value texture_data = json_data["textures"][i];
+        printf("asdf2\n");
         DdsFile dds;
+        // printf("asdf3\n");
         if (!dds.Load(dds_bytes.data(), dds_bytes.size())) {
+            std::cerr << "Failed to load dds data" << std::endl;
             return std::vector<uint8_t>();
         }
         G1tTexture tex;
         if (!G1tFile::FromDDS(tex, dds, nullptr, nullptr)) {
+            std::cerr << "Failed to convert dds to g1t texture" << std::endl;
             return std::vector<uint8_t>();
         }
+        tex.sys = static_cast<uint8_t>(texture_data["sys"].asUInt());
+        // tex.sys = static_cast<uint8_t>(texture_data["sys"].asUInt());
+        // printf("asdf4\n");
+        if (texture_data.isMember("extra_header")) { 
+            for (auto& x : texture_data["extra_header"]) {
+                uint8_t val = static_cast<uint8_t>(x.asUInt());
+                printf("extra_header: 0x%X\n", val);
+                tex.extra_header.push_back(val);
+            }
+        }
+        if (texture_data.isMember("flags")) {
+            size_t size = texture_data["flags"].size();
+            std::cout << "flags is an array size: " << size << std::endl;
+            int k = 0;
+            for (auto& flag : texture_data["flags"]) {
+                uint8_t flag_val = static_cast<uint8_t>(flag.asUInt());
+                if (k == 4) {
+                } else {
+                    tex.unk_3[k] = flag_val;
+                } 
+                k++;
+            }
+            // uint8_t extra_hdr_ver = static_cast<uint8_t>(texture_data["flags"][size-1].asUInt());
+        }
+        // uint8_t extra_header_version = static_cast<uint8_t>(texture_data["extra_header_version"].asUInt());
+        uint8_t extra_header_version = (uint8_t)(texture_data["extra_header_version"].asUInt());
+        // printf("asdf5 0x%X vs 0x%X\n", extra_header_version, tex.extra_header_version);
+        // tex.extra_header_version = extra_header_version;
+        std::cout << "Before setting extra_header_version: " << static_cast<int>(extra_header_version) << std::endl;
+        tex.extra_header_version = extra_header_version;
+        std::cout << "After setting extra_header_version" << std::endl;
+
         g1t.textures.push_back(tex);
         // std::cout << "G1tCompile texture id: " << i << " sys: " << tex.sys  << std::endl;
-        ss << "G1tCompile texture id: " << i << " sys: " << tex.sys  << std::endl;
+        // ss << "G1tCompile texture id: " << i << " sys: " << tex.sys  << std::endl;
         i++;
     }
-    // std::cout << "G1tCompile metadata: " << g1t.GetMetadataCsv() << std::endl;
+    std::cout << "Textures parsed "  << std::endl;
 
     //For some absurd reason this line along with stringstream operation must remain as is
     //in order to ensure the correct g1t bytes parsing
-    g1t.GetMetadataCsv();
+    // g1t.GetMetadataCsv();
     // std::this_thread::sleep_for(std::chrono::seconds(1));
     size_t size;
 	
+    std::cout << "Before saving"  << std::endl;
     uint8_t *buf = g1t.Save(&size);
+    std::cout << "After saving"  << std::endl;
 	
-	if (!buf)
+	if (!buf) {
+        std::cerr << "Failed to save g1t data (::Save function)" << std::endl;
 		return std::vector<uint8_t>();
+    }
 	std::vector<uint8_t> res(buf, buf + size);
 	delete[] buf;
     return res;
@@ -103,19 +189,16 @@ PYBIND11_MODULE(g1t_module, m) {
     }, "Decompile G1t data", py::arg("g1t_data"));
 
     // Expose G1tCompile function
-    m.def("G1tCompile", [](py::list dds_list) {
-        // Convert list of bytes to std::vector<std::vector<uint8_t>>
+   m.def("G1tCompile", [](py::list dds_list, const std::string& metadata) {
         std::vector<std::vector<uint8_t>> dds_vector;
         for (auto item : dds_list) {
             py::bytes dds_data = item.cast<py::bytes>();
-            std::string dds_str = dds_data;  // convert py::bytes to std::string
+            std::string dds_str = dds_data;
             dds_vector.emplace_back(dds_str.begin(), dds_str.end());
         }
 
-        // Call the C++ function
-        std::vector<uint8_t> compiled_data = G1tCompile(dds_vector);
+        std::vector<uint8_t> compiled_data = G1tCompile(dds_vector, metadata);
 
-        // Return compiled data as bytes
         return py::bytes(reinterpret_cast<const char*>(compiled_data.data()), compiled_data.size());
-    }, "Compile G1t data from DDS data", py::arg("dds_data"));
+    }, "Compile G1t data from DDS data and metadata", py::arg("dds_data"), py::arg("metadata"));
 }

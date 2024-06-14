@@ -50,6 +50,8 @@
 /gust_stuff
 /eternity_common
 /DirectXTex
+/rapidjson
+/tmp
 
 # rs
 /target

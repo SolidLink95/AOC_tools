@@ -67,25 +67,19 @@ struct G1tTexture
     int IdealMipsCount() const;
 };
 
-// class G1tFile : public BaseFile
-class G1tFile 
+class G1tFile
 {
-    protected:
-        bool big_endian;
-        uint32_t val32(uint32_t val) const;
-        
-        uint8_t *GetOffsetPtr(const void *base, uint32_t offset, bool native=false) const;
-        uint8_t *GetOffsetPtr(const void *base, const uint32_t *offsets_table, uint32_t idx, bool native=false) const;
 private:
+
 
     size_t CalculateFileSize() const;
 
 protected:
-
+ bool big_endian;
     void Reset();
+    uint32_t val32(uint32_t val) const;
 
 public:
-    // G1THeader main_header;
     std::vector<G1tTexture> textures;
 
     std::vector<uint8_t> extra_header;
@@ -115,8 +109,8 @@ public:
     static bool FromDDS(G1tTexture &tex, const DdsFile &dds, uint8_t *fmt=nullptr, uint8_t *prev_fmt=nullptr);
     bool FromDDS(size_t idx, const DdsFile &dds, uint8_t *fmt=nullptr, uint8_t *prev_fmt=nullptr);
 
-    static size_t CalculateTextureSize(const G1tTexture &tex, int override_levels=-1);
-    size_t CalculateTextureSize(size_t idx, int override_levels=-1) const;
+    static size_t CalculateTextureSize(const G1tTexture &tex, int _levels=-1);
+    size_t CalculateTextureSize(size_t idx, int _levels=-1) const;
 
     bool IsArrayTexture(size_t idx) const;
     bool DecomposeArrayTexture(size_t idx, std::vector<G1tTexture> &ret, bool only_firstlevel, bool show_error) const;
@@ -146,6 +140,11 @@ public:
     static int IdealMipsCount(int width, int height);
     std::string GetMetadataCsv();
     std::vector<uint8_t> ToBytes();
+    std::string GetMetadataJson();
+    uint8_t *GetOffsetPtr(const void *base, uint32_t offset, bool native=false) const;
+    uint8_t *GetOffsetPtr(const void *base, const uint32_t *offsets_table, uint32_t idx, bool native=false) const;
+
 };
 
+uint32_t swap_bytes(uint32_t value);
 #endif // G1TFILE_H

@@ -4,16 +4,16 @@ CXX = g++
 OUTPUT1 := g1m_converter.exe
 OUTPUT2 := g1t_converter.exe
 OUTPUT3 := ktid_converter.exe
-OBJS = debug.o Utils.o ../eternity_common/BaseFile.o FilesOperations.o stb_image.o 
+OBJS = debug.o ../eternity_common/Utils.o ../eternity_common/BaseFile.o FilesOperations.o stb_image.o 
 OBJS += ../eternity_common/crypto/sha1.o ../eternity_common/crypto/md5.o ../eternity_common/crypto/rijndael.o
 OBJS += ../eternity_common/Stream.o ../eternity_common/MemoryStream.o ../eternity_common/FixedMemoryStream.o ../eternity_common/FileStream.o ../eternity_common/BitStream.o ../eternity_common/FixedBitStream.o
 OBJS += ../eternity_common/math/Vector.o 
 OBJS += ../eternity_common/DOA6/G1mFile.o G1tFile.o DdsFile.o 
 OBJS += tinyxml/tinyxml.o tinyxml/tinystr.o tinyxml/tinyxmlerror.o tinyxml/tinyxmlparser.o
-OBJS += KtidFile.o MtlFile.o  ../eternity_common/DOA6/KidsObjDBFile.o
+OBJS += ../eternity_common/DOA6/KtidFile.o ../eternity_common/DOA6/MtlFile.o  ../eternity_common/DOA6/KidsObjDBFile.o  ../eternity_common/DOA6/SrsaFile.o
 
 CFLAGS=-Wall -I. -I../eternity_common  -std=gnu99 -O2 
-CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb  -O2 -std=c++17 -DTIXML_USE_STL -static 
+CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb  -I/mingw64/include  -O2 -std=c++17 -DTIXML_USE_STL -static 
 LDFLAGS=-L. -ld3d9 -ld3dx9 -L../lib #-lDirectXTex
 LIBS = -lstdc++ -lz -lversion -ld3dx9
 
@@ -45,11 +45,17 @@ main.o: main.cpp
 stb_image.o: stb_image.cpp
 	$(CXX) $(CXXFLAGS) -c stb_image.cpp -o stb_image.o
 
-KtidFile.o: KtidFile.cpp
-	$(CXX) $(CXXFLAGS) -c KtidFile.cpp -o KtidFile.o
+../eternity_common/DOA6/KtidFile.o: ../eternity_common/DOA6/KtidFile.cpp
+	$(CXX) $(CXXFLAGS) -c ../eternity_common/DOA6/KtidFile.cpp -o ../eternity_common/DOA6/KtidFile.o
 
-MtlFile.o: MtlFile.cpp
-	$(CXX) $(CXXFLAGS) -c MtlFile.cpp -o MtlFile.o
+# ../eternity_common/DOA6/SrsaFile.o: ../eternity_common/DOA6/SrsaFile.cpp
+# 	$(CXX) $(CXXFLAGS) -c ../eternity_common/DOA6/SrsaFile.cpp -o ../eternity_common/DOA6/SrsaFile.o
+
+# ../eternity_common/DOA6/SrstFile.o: ../eternity_common/DOA6/SrstFile.cpp
+# 	$(CXX) $(CXXFLAGS) -c ../eternity_common/DOA6/SrstFile.cpp -o ../eternity_common/DOA6/SrstFile.o
+
+../eternity_common/DOA6/MtlFile.o: ../eternity_common/DOA6/MtlFile.cpp
+	$(CXX) $(CXXFLAGS) -c ../eternity_common/DOA6/MtlFile.cpp -o ../eternity_common/DOA6/MtlFile.o
 
 # OidFile.o: OidFile.cpp
 # 	$(CXX) $(CXXFLAGS) -c OidFile.cpp -o OidFile.o
@@ -60,8 +66,8 @@ FilesOperations.o: FilesOperations.cpp
 debug.o: debug.cpp
 	$(CXX) $(CXXFLAGS) -c debug.cpp -o debug.o
 
-Utils.o: Utils.cpp
-	$(CXX) $(CXXFLAGS) -I"C:/Program Files/zlib/include" -c Utils.cpp -o Utils.o
+../eternity_common/Utils.o: ../eternity_common/Utils.cpp
+	$(CXX) $(CXXFLAGS) -I"C:/Program Files/zlib/include" -c ../eternity_common/Utils.cpp -o ../eternity_common/Utils.o
 
 ../eternity_common/BaseFile.o: ../eternity_common/BaseFile.cpp
 	$(CXX) $(CXXFLAGS) -c ../eternity_common/BaseFile.cpp -o ../eternity_common/BaseFile.o

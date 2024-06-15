@@ -1113,6 +1113,7 @@ std::string G1tFile::GetMetadataJson() {
         // tex_json["image_data_size"] = tex.image_data.size();
         res["textures"].append(tex_json);
         delete dds;
+		i++;
 
     }
     Json::StreamWriterBuilder writer;

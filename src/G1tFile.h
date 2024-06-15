@@ -91,7 +91,7 @@ public:
     G1tFile();
     virtual ~G1tFile() override;
 
-    std::string GetMetadataCsv() const;
+    // std::string GetMetadataCsv() const;
 
     virtual bool Load(const uint8_t *buf, size_t size) override;
     virtual uint8_t *Save(size_t *psize) override;
@@ -137,7 +137,7 @@ public:
     static int DdsToG1tFormat(int dds_fmt);
 
     static int IdealMipsCount(int width, int height);
-    std::string G1tFile::GetMetadataCsv();
+    // std::string G1tFile::GetMetadataCsv();
 };
 
 #endif // G1TFILE_H

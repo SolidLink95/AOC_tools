@@ -6,8 +6,10 @@
 #include <cstdio>
 #include <iostream>
 #include "../eternity_common/DOA6/KidsObjDBFile.h"
-#include "KtidFile.h"
-#include "MtlFile.h"
+#include "../eternity_common/DOA6/KtidFile.h"
+#include "../eternity_common/DOA6/MtlFile.h"
+// #include "../eternity_common/DOA6/SrsaFile.h"
+// #include "../eternity_common/DOA6/SrstFile.h"
 #include "FilesOperations.h"
 #include "Utils.h"
 
@@ -85,8 +87,7 @@ bool TextToBinary(const std::string& path) {
 
 }
 
-std::string BinaryToText(const std::vector<uint8_t> &data, const std::string &path)
-{
+std::string KidsObToString(const std::vector<uint8_t> &data) {
     std::string res;
     KidsObjDBFile kdb;
     if (kdb.Load(data.data(), data.size())) {
@@ -104,38 +105,113 @@ std::string BinaryToText(const std::vector<uint8_t> &data, const std::string &pa
         } else {
             std::cerr << "Failed to save KDB to string" << std::endl;
         }
-        // if (doc != nullptr){
-        //     if (doc->SaveFile((path + ".xml").c_str())) {
-        //         std::cout << "Saved KDB to XML" << std::endl;
-        //         exit(0);
-        //     }
-        // }
-        // else {
-        //     std::cerr << "Failed to decompile KDB file" << std::endl;
-        // }
     }
+    return res;
+}
+
+std::string KtidToString(const std::vector<uint8_t> &data) {
+    std::string res;
     KtidFile ktid;
     if (ktid.Load(data.data(), data.size()))
     {
         std::cout << "Loaded KTID file" << std::endl;
-        if (ktid.SaveToString(res, path, nullptr, false)) {
-            return res;
+        TiXmlDocument *doc = ktid.Decompile();
+        if (doc) {
+            res = TiXmlDocumentToString(*doc);
+            delete doc; // Ensure proper cleanup
+        } else {
+            std::cerr << "Failed to decompile KTID file" << std::endl;
         }
-        else {
+        if (!res.empty()) {
+            std::cout << "Converted KTID" << std::endl;
+            return res;
+        } else {
             std::cerr << "Failed to save KTID to string" << std::endl;
         }
     }
+    return res;
+}
+
+std::string MtlToString(const std::vector<uint8_t> &data) {
+    std::string res;
     MtlFile mtl;
     if (mtl.Load(data.data(), data.size()))
     {
         std::cout << "Loaded MTL file" << std::endl;
-        if (mtl.SaveToString(res, path, nullptr, false)){
-            return res;
+        TiXmlDocument *doc = mtl.Decompile();
+        if (doc) {
+            res = TiXmlDocumentToString(*doc);
+            delete doc; // Ensure proper cleanup
+        } else {
+            std::cerr << "Failed to decompile MTL file" << std::endl;
         }
-        else {
+        if (!res.empty()) {
+            std::cout << "Converted MTL" << std::endl;
+            return res;
+        } else {
             std::cerr << "Failed to save MTL to string" << std::endl;
         }
     }
+    return res;
+}
+
+// std::string SrsaToString(const std::vector<uint8_t> &data) {
+//     std::string res;
+//     SrsaFile srsa;
+//     if (srsa.Load(data.data(), data.size()))
+//     {
+//         std::cout << "Loaded SRSA file" << std::endl;
+//         TiXmlDocument *doc = srsa.Decompile();
+//         if (doc) {
+//             res = TiXmlDocumentToString(*doc);
+//             delete doc; // Ensure proper cleanup
+//         } else {
+//             std::cerr << "Failed to decompile SRSA file" << std::endl;
+//         }
+//         if (!res.empty()) {
+//             std::cout << "Converted SRSA" << std::endl;
+//             return res;
+//         } else {
+//             std::cerr << "Failed to save SRSA to string" << std::endl;
+//         }
+//     }
+//     return res;
+// }
+
+// std::string SrstToString(const std::vector<uint8_t> &data) {
+//     std::string res;
+//     SrstFile srst;
+//     if (srst.Load(data.data(), data.size()))
+//     {
+//         std::cout << "Loaded SRST file" << std::endl;
+//         TiXmlDocument *doc = srst.Decompile();
+//         if (doc) {
+//             res = TiXmlDocumentToString(*doc);
+//             delete doc; // Ensure proper cleanup
+//         } else {
+//             std::cerr << "Failed to decompile SRST file" << std::endl;
+//         }
+//         if (!res.empty()) {
+//             std::cout << "Converted SRST" << std::endl;
+//             return res;
+//         } else {
+//             std::cerr << "Failed to save SRST to string" << std::endl;
+//         }
+//     }
+//     return res;
+// }
+
+std::string BinaryToText(const std::vector<uint8_t> &data, const std::string &path)
+{
+    std::string res = KidsObToString(data);
+    if (!res.empty()) return res;
+    res = KtidToString(data);
+    if (!res.empty()) return res;
+    res = MtlToString(data);
+    if (!res.empty()) return res;
+    // res = SrsaToString(data);
+    // if (!res.empty()) return res;
+    // res = SrstToString(data);
 
     return res;
 }
@@ -153,7 +229,7 @@ int main(int argc, char *argv[])
     }
     std::string path = argv[1];
     std::vector<uint8_t> data = FileToBytes(path);
-    if (Utils::EndsWith(Utils::ToLowerCase(path), ".xml"))
+    if (Utils::EndsWith(Utils::ToLowerCase(path), ".xml") || Utils::EndsWith(Utils::ToLowerCase(path), ".txt"))
     {
         if (TextToBinary(path)) {
             std::cout << "Success" << std::endl;

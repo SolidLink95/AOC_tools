@@ -1041,20 +1041,20 @@ int G1tFile::IdealMipsCount(int width, int height)
 }
 
 
-std::string G1tFile::GetMetadataCsv() {
-    int i = 0;
-    std::string g1t_csv;
-    std::string d(";");
-    for (auto tex : textures)
-    {
-        DdsFile *dds = G1tFile::ToDDS(tex);
-        g1t_csv += std::to_string(i) + d + std::to_string(tex.width) + d + std::to_string(tex.height) + d + dds->GetFormatName() + d;
-        g1t_csv += std::to_string(dds->GetFormat()) + d + std::to_string(dds->GetMips()) + d + "\n";
-        delete dds;
-        i++;
-    }
+// std::string G1tFile::GetMetadataCsv() {
+//     int i = 0;
+//     std::string g1t_csv;
+//     std::string d(";");
+//     for (auto tex : textures)
+//     {
+//         DdsFile *dds = G1tFile::ToDDS(tex);
+//         g1t_csv += std::to_string(i) + d + std::to_string(tex.width) + d + std::to_string(tex.height) + d + dds->GetFormatName() + d;
+//         g1t_csv += std::to_string(dds->GetFormat()) + d + std::to_string(dds->GetMips()) + d + "\n";
+//         delete dds;
+//         i++;
+//     }
 
 
 
-    return g1t_csv;
-}
+//     return g1t_csv;
+// }

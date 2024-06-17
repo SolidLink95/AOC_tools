@@ -67,7 +67,7 @@ struct G1tTexture
     int IdealMipsCount() const;
 };
 
-class G1tFile : public BaseFile
+class G1tFile
 {
 private:
 
@@ -75,8 +75,9 @@ private:
     size_t CalculateFileSize() const;
 
 protected:
-
+ bool big_endian;
     void Reset();
+    uint32_t val32(uint32_t val) const;
 
 public:
     std::vector<G1tTexture> textures;
@@ -89,12 +90,12 @@ public:
     uint32_t unk_1C;
 
     G1tFile();
-    virtual ~G1tFile() override;
+    virtual ~G1tFile() ;
 
-    // std::string GetMetadataCsv() const;
+    std::string GetMetadataCsv() const;
 
-    virtual bool Load(const uint8_t *buf, size_t size) override;
-    virtual uint8_t *Save(size_t *psize) override;
+    virtual bool Load(const uint8_t *buf, size_t size) ;
+    virtual uint8_t *Save(size_t *psize) ;
 
     inline size_t GetNumTextures() const { return textures.size(); }    
 
@@ -108,8 +109,8 @@ public:
     static bool FromDDS(G1tTexture &tex, const DdsFile &dds, uint8_t *fmt=nullptr, uint8_t *prev_fmt=nullptr);
     bool FromDDS(size_t idx, const DdsFile &dds, uint8_t *fmt=nullptr, uint8_t *prev_fmt=nullptr);
 
-    static size_t CalculateTextureSize(const G1tTexture &tex, int override_levels=-1);
-    size_t CalculateTextureSize(size_t idx, int override_levels=-1) const;
+    static size_t CalculateTextureSize(const G1tTexture &tex, int _levels=-1);
+    size_t CalculateTextureSize(size_t idx, int _levels=-1) const;
 
     bool IsArrayTexture(size_t idx) const;
     bool DecomposeArrayTexture(size_t idx, std::vector<G1tTexture> &ret, bool only_firstlevel, bool show_error) const;
@@ -137,7 +138,13 @@ public:
     static int DdsToG1tFormat(int dds_fmt);
 
     static int IdealMipsCount(int width, int height);
-    // std::string G1tFile::GetMetadataCsv();
+    std::string GetMetadataCsv();
+    std::vector<uint8_t> ToBytes();
+    std::string GetMetadataJson();
+    uint8_t *GetOffsetPtr(const void *base, uint32_t offset, bool native=false) const;
+    uint8_t *GetOffsetPtr(const void *base, const uint32_t *offsets_table, uint32_t idx, bool native=false) const;
+
 };
 
+uint32_t swap_bytes(uint32_t value);
 #endif // G1TFILE_H

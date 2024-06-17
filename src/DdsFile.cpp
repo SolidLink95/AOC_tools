@@ -1,5 +1,5 @@
 #include "DdsFile.h"
-#include "Utils.h"
+#include "FilesOperations.h"
 #include "debug.h"
 #include "../stb/stb_image.h"
 #include <stdexcept>
@@ -271,10 +271,10 @@ bool DdsFile::DecodeR16G16B16A16Float(uint32_t *dec, bool *alpha) const
 
     for (uint32_t i = 0; i < dim; i++)
     {
-        uint32_t r = (uint32_t) (Utils::HalfToFloat(rgba[0]) * 255.0f);
-        uint32_t g = (uint32_t) (Utils::HalfToFloat(rgba[1]) * 255.0f);
-        uint32_t b = (uint32_t) (Utils::HalfToFloat(rgba[2]) * 255.0f);
-        uint32_t a = (uint32_t) (Utils::HalfToFloat(rgba[3]) * 255.0f);
+        uint32_t r = (uint32_t) (HalfToFloat(rgba[0]) * 255.0f);
+        uint32_t g = (uint32_t) (HalfToFloat(rgba[1]) * 255.0f);
+        uint32_t b = (uint32_t) (HalfToFloat(rgba[2]) * 255.0f);
+        uint32_t a = (uint32_t) (HalfToFloat(rgba[3]) * 255.0f);
 
         uint32_t color = (a << 24) | (r << 16) | (g << 8) | b;
         dec[i] = color;
@@ -313,8 +313,8 @@ bool DdsFile::DecodeR16G16Float(uint32_t *dec, bool *alpha) const
     const uint16_t *rf = (const uint16_t *)raw.data();
     for (uint32_t i = 0; i < dim; i++)
     {
-        uint32_t r = (uint32_t) (Utils::HalfToFloat(rf[0]) * 255.0f);
-        uint32_t g = (uint32_t) (Utils::HalfToFloat(rf[1]) * 255.0f);
+        uint32_t r = (uint32_t) (HalfToFloat(rf[0]) * 255.0f);
+        uint32_t g = (uint32_t) (HalfToFloat(rf[1]) * 255.0f);
         dec[i] = (r << 16) | (g << 8) | 0xFF000000;
 
         rf += 2;
@@ -475,7 +475,7 @@ std::string DdsFile::GetFormatName(int format)
     {
         ret = dxgi_str[(size_t)format];
 
-        if (Utils::BeginsWith(ret, "DXGI_FORMAT_"))
+        if (BeginsWith(ret, "DXGI_FORMAT_", true))
         {
             ret = ret.substr(12);
         }
@@ -486,29 +486,29 @@ std::string DdsFile::GetFormatName(int format)
 
 
 
-std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt) {
-     int width, height, channels;
-    stbi_uc* data = stbi_load_from_memory(pngData.data(), pngData.size(), &width, &height, &channels, 0);
-    if (!data) {
-        throw std::runtime_error("Failed to load PNG image");
-    }
+// std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt) {
+//      int width, height, channels;
+//     stbi_uc* data = stbi_load_from_memory(pngData.data(), pngData.size(), &width, &height, &channels, 0);
+//     if (!data) {
+//         throw std::runtime_error("Failed to load PNG image");
+//     }
 
-    DDSHeader ddsHeader;
-    ddsHeader.width = width;
-    ddsHeader.height = height;
-    ddsHeader.mip_map_count = mipMapCount;
-    ddsHeader.pitch_or_linear_size = width * height * channels;
-    ddsHeader.pf.flags = (channels == 4) ? DDS_PF_ALPHAPIXELS : DDS_PF_RGB;
-    ddsHeader.pf.rgb_bit_count = channels * 8;
-    ddsHeader.pf.r_mask = 0x00FF0000;
-    ddsHeader.pf.g_mask = 0x0000FF00;
-    ddsHeader.pf.b_mask = 0x000000FF;
-    ddsHeader.pf.a_mask = (channels == 4) ? 0xFF000000 : 0;
+//     DDSHeader ddsHeader;
+//     ddsHeader.width = width;
+//     ddsHeader.height = height;
+//     ddsHeader.mip_map_count = mipMapCount;
+//     ddsHeader.pitch_or_linear_size = width * height * channels;
+//     ddsHeader.pf.flags = (channels == 4) ? DDS_PF_ALPHAPIXELS : DDS_PF_RGB;
+//     ddsHeader.pf.rgb_bit_count = channels * 8;
+//     ddsHeader.pf.r_mask = 0x00FF0000;
+//     ddsHeader.pf.g_mask = 0x0000FF00;
+//     ddsHeader.pf.b_mask = 0x000000FF;
+//     ddsHeader.pf.a_mask = (channels == 4) ? 0xFF000000 : 0;
 
-    std::vector<uint8_t> ddsData(sizeof(DDSHeader) + width * height * channels);
-    memcpy(ddsData.data(), &ddsHeader, sizeof(DDSHeader));
-    memcpy(ddsData.data() + sizeof(DDSHeader), data, width * height * channels);
+//     std::vector<uint8_t> ddsData(sizeof(DDSHeader) + width * height * channels);
+//     memcpy(ddsData.data(), &ddsHeader, sizeof(DDSHeader));
+//     memcpy(ddsData.data() + sizeof(DDSHeader), data, width * height * channels);
 
-    stbi_image_free(data);
-    return ddsData;
-}
+//     stbi_image_free(data);
+//     return ddsData;
+// }

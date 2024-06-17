@@ -10,10 +10,11 @@ OBJS += ../eternity_common/Stream.o ../eternity_common/MemoryStream.o ../eternit
 OBJS += ../eternity_common/math/Vector.o 
 OBJS += ../eternity_common/DOA6/G1mFile.o G1tFile.o DdsFile.o 
 OBJS += tinyxml/tinyxml.o tinyxml/tinystr.o tinyxml/tinyxmlerror.o tinyxml/tinyxmlparser.o
-OBJS += ../eternity_common/DOA6/KtidFile.o ../eternity_common/DOA6/MtlFile.o  ../eternity_common/DOA6/KidsObjDBFile.o  ../eternity_common/DOA6/SrsaFile.o
+OBJS += ../eternity_common/DOA6/KtidFile.o ../eternity_common/DOA6/MtlFile.o  ../eternity_common/DOA6/KidsObjDBFile.o  #../eternity_common/DOA6/SrsaFile.o
+OBJS += ../jsoncpp/src/lib_json/json_value.o ../jsoncpp/src/lib_json/json_reader.o ../jsoncpp/src/lib_json/json_writer.o
 
 CFLAGS=-Wall -I. -I../eternity_common  -std=gnu99 -O2 
-CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb  -I/mingw64/include  -O2 -std=c++17 -DTIXML_USE_STL -static 
+CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb -I../jsoncpp/include -I../jsoncpp/src/lib_json  -I/mingw64/include  -O2 -std=c++17 -DTIXML_USE_STL -static 
 LDFLAGS=-L. -ld3d9 -ld3dx9 -L../lib #-lDirectXTex
 LIBS = -lstdc++ -lz -lversion -ld3dx9
 
@@ -116,6 +117,15 @@ tinyxml/tinyxmlerror.o: tinyxml/tinyxmlerror.cpp
 
 tinyxml/tinyxmlparser.o: tinyxml/tinyxmlparser.cpp
 	$(CXX) $(CXXFLAGS) -c tinyxml/tinyxmlparser.cpp -o tinyxml/tinyxmlparser.o
+
+../jsoncpp/src/lib_json/json_value.o: ../jsoncpp/src/lib_json/json_value.cpp
+	$(CXX) $(CXXFLAGS) -c ../jsoncpp/src/lib_json/json_value.cpp -o ../jsoncpp/src/lib_json/json_value.o
+
+../jsoncpp/src/lib_json/json_reader.o: ../jsoncpp/src/lib_json/json_reader.cpp
+	$(CXX) $(CXXFLAGS) -c ../jsoncpp/src/lib_json/json_reader.cpp -o ../jsoncpp/src/lib_json/json_reader.o
+
+../jsoncpp/src/lib_json/json_writer.o: ../jsoncpp/src/lib_json/json_writer.cpp
+	$(CXX) $(CXXFLAGS) -c ../jsoncpp/src/lib_json/json_writer.cpp -o ../jsoncpp/src/lib_json/json_writer.o
 
 # Compilation rules for C files
 ../eternity_common/crypto/sha1.o: ../eternity_common/crypto/sha1.c

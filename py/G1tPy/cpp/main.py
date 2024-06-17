@@ -27,14 +27,14 @@ p = "W:/coding/AOC_tools/test_data/0cc1a2b4.g1t"
 # print("/nModded metadata: ", json.dumps(g1t_modded.metadata, indent=4))
 # Path("tmp/modded_g1t.json").write_text(json.dumps(g1t_modded.metadata, indent=4))
 print("/nExtracting vanila")
-g1t_vanila = G1T("8279b3ed.g1t")
+g1t_vanila = G1T("0cc1a2b4.g1t")
 #Path("tmp/vanila_g1t.json").write_text(json.dumps(g1t_vanila.metadata, indent=4))
 # print("/n/nvanila metadata: ", json.dumps(g1t_vanila.metadata, indent=4))
 #g1t_vanila.from_dir(Path("tmp/0cc1a2b4"))
 #g1t_vanila.save_file("tmp/0cc1a2b4.g1t")
 # g1t_vanila.extract_to_dir("tmp/0cc1a2b4")
 
-g1t_vanila.extract_to_dir("tmp/8279b3ed")
+g1t_vanila.extract_to_dir("tmp/0cc1a2b4")
 
 
 # g1t_modded.extract_to_dir(r"W:/coding/AOC_tools/tmp/temp")
@@ -76,3 +76,6 @@ g1t_vanila.extract_to_dir("tmp/8279b3ed")
 # g1t_data = Path(p).read_bytes()
 # metadata, dds_data = g1t_module.G1tDecompile(g1t_data)
 # print(metadata)
+
+
+print("done")

@@ -8,7 +8,7 @@
 #include "dxgi_int.h"
 #endif
 
-#include "BaseFile.h"
+#include "../eternity_common/BaseFile.h"
 
 #define DDS_SIGNATURE 0x20534444
 
@@ -156,7 +156,8 @@ CHECK_STRUCT_SIZE(DXT10Header, 0x14);
 #pragma pack(pop)
 #endif
 
-class DdsFile : public BaseFile
+// class DdsFile : public BaseFile
+class DdsFile 
 {
 private:
 
@@ -174,7 +175,7 @@ private:
 #endif
 
 protected:
-
+    bool big_endian;
     void Reset();
 
 public:
@@ -187,10 +188,10 @@ public:
 
     DdsFile();
     DdsFile(int format, uint32_t width, uint32_t height, int mip_maps, const uint8_t *buf, size_t buf_size);
-    virtual ~DdsFile() override;
+    virtual ~DdsFile() ;
 
-    virtual bool Load(const uint8_t *buf, size_t size) override;
-    virtual uint8_t *Save(size_t *psize) override;
+    virtual bool Load(const uint8_t *buf, size_t size) ;
+    virtual uint8_t *Save(size_t *psize) ;
     std::vector<uint8_t> ToBytes();
     uint32_t *Decode(bool *alpha) const;
 
@@ -207,7 +208,7 @@ public:
     inline std::string GetFormatName() { return GetFormatName(format); }
     void DisplayInfo() const;
 };
-std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt);
+// std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt);
 // std::vector<uint8_t> convertDdsData(const std::vector<uint8_t>& ddsData, int mipMapCount, int width, int height, int formatInt);
 // std::vector<uint8_t> createDdsDataFromPngData(const std::vector<uint8_t>& pngData, int mipMapCount, int formatInt);
 

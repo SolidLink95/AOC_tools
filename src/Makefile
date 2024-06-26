@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
 
-OUTPUT1 := g1m_converter.exe
+# OUTPUT1 := g1m_converter.exe
 OUTPUT2 := g1t_converter.exe
 OUTPUT3 := ktid_converter.exe
 OBJS = debug.o ../eternity_common/Utils.o ../eternity_common/BaseFile.o FilesOperations.o stb_image.o 
@@ -18,7 +18,7 @@ CXXFLAGS=-Wall -Wno-strict-aliasing -I../eternity_common -I../stb -I../jsoncpp/i
 LDFLAGS=-L. -ld3d9 -ld3dx9 -L../lib #-lDirectXTex
 LIBS = -lstdc++ -lz -lversion -ld3dx9
 
-all: $(OUTPUT1) $(OUTPUT2) $(OUTPUT3)
+all:  $(OUTPUT2) $(OUTPUT3)
 
 clean: 
 	rm -f $(OUTPUT1) $(OUTPUT2) *.o

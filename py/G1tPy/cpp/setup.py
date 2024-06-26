@@ -2,6 +2,8 @@
 from setuptools import setup, Extension
 import pybind11
 
+########## python setup.py build_ext --inplace
+
 ext_modules = [
     Extension(
         "g1t_module",

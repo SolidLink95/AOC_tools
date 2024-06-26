@@ -1,9 +1,8 @@
 import io
 import json
 from pathlib import Path
-from tkinter import Tcl
 import g1t_module as g1t_module
-import hashlib
+import hashlib, re
 
 def fileToMd5(file):
     return bytesToMd5(Path(file).read_bytes())
@@ -13,9 +12,13 @@ def bytesToMd5(data):
 
 
 class G1T():
-    def __init__(self, input_data) -> None:
+    def __init__(self, input_data=None) -> None:
         self.data = None
+        self.Hash = "UNKNOWN"
         self.metadata = {}
+        self.dds = []
+        if input_data is None:
+            return
         if self.process_data(input_data):
             return
         
@@ -34,6 +37,7 @@ class G1T():
             self.data = bytes(input_data)
         elif isinstance(input_data, str) or isinstance(input_data, Path):
             p = Path(input_data)
+            self.Hash = p.stem.lower().replace("0x","")
             if p.exists():
                 if p.is_dir():
                     self.from_dir(p)
@@ -43,7 +47,7 @@ class G1T():
                 else:
                     raise ValueError("Invalid path")
         elif isinstance(input_data, G1T):
-            self.data = input_data.data
+            self.data = bytes(input_data.data)
         elif isinstance(input_data, io.BytesIO) or isinstance(input_data, io.BufferedReader):
             self.data = input_data.read()
         if self.data is None:
@@ -80,21 +84,6 @@ class G1T():
         self.metadata = json.loads(metadata)
         for i, _ in enumerate(self.metadata["textures"]):
             self.metadata["textures"][i]["MD5"] = bytesToMd5(self.dds[i])
-        return
-        for line in metadata.split("\n"):
-            if line.strip() == "":
-                continue
-            if line.count(";") != 6:
-                raise Exception(f"Invalid metadata line: {line}")
-            id, w, h, formatStr, formatInt, mip_count, _ = line.split(";")
-            self.metadata[id] = {
-                "width": int(w),
-                "height": int(h),
-                "format": formatStr,
-                "formatInt": int(formatInt),
-                "mip_count": int(mip_count),
-                "MD5": bytesToMd5(self.dds[int(id)])
-            }
     
     def metadata_to_csv(self):
         res = ""
@@ -130,10 +119,16 @@ class G1T():
         file_path.write_bytes(rawdata)
         
 
-
-def sort_files_like_windows(mylist: list):
+def sort_files_like_windows(mylist):
     """Sort list just like Windows explorer does: ['1','2','3'...] instead of ['1','10','11',...]"""
-    return Tcl().call('lsort', '-dict', mylist)
+    
+    def alphanum_key(s):
+        """Turn a string into a list of string and number chunks."""
+        # The regular expression splits the string into parts: numeric and non-numeric
+        return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
+    
+    # Return the list sorted using the alphanum_key
+    return sorted(mylist, key=alphanum_key)
 
 
 class HexIntEncoder(json.JSONEncoder):

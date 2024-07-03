@@ -7,6 +7,10 @@ def ktid_dict_to_binary_file(path, data):
     with open(path, "wb") as f:
         f.write(ktid_dict_to_binary(data))
     
+def ktid_dict_to_binary_file(json_data, path):
+    with open(path, "wb") as f:
+        return f.write(ktid_dict_to_binary(json_data))
+
 def ktid_dict_to_binary(data):
     res = b""
     for key, value in data.items():

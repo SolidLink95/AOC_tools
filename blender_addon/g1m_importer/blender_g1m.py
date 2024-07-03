@@ -39,6 +39,7 @@ from bpy_extras.image_utils import load_image
 from g1m_importer.g1m_exporter.g1m_export_meshes import parseG1M, parseG1MFile
 from g1m_importer.g1m_exporter.g1m_to_basic_gltf import G1M2glTFBinary, gltfData
 from g1m_importer.g1m_exporter.g1m_import_meshes import build_g1m_from_binary 
+from g1m_importer.KtidsKidsobs import ktid_dict_to_binary_file 
 # from g1m_importer.G1M_Exporter_plugin import exporter_classes_register,exporter_classes_unregister
 from mathutils import Matrix, Vector
 from g1m_importer.util import *
@@ -2617,15 +2618,13 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         remove_dir_if_exists(path)
         #Process textures
         tex_dir = root_dir / Path(f"{g1m_name}_textures")
+        tmp_io = StringBytesIO()
         if self.tex_from_dump:    
-            original = sys.stdout
-            sys.stdout = io.StringIO()
-            g1m.get_g1t_data_from_dump(g1ts=g1ts)
-            tex_dir.mkdir(parents=True, exist_ok=True)
-            # remove_dir_if_exists(tex_dir) # restore later
-            g1m.extract_g1t_textures(tex_dir)
-            g1m.generate_materials(tex_dir, isemm=(not self.skip_emm), isnrm=(not self.skip_nrm), isspm=(not self.skip_spm))
-            sys.stdout = original
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                g1m.get_g1t_data_from_dump(g1ts=g1ts)
+                tex_dir.mkdir(parents=True, exist_ok=True)
+                g1m.extract_g1t_textures(tex_dir)
+                g1m.generate_materials(tex_dir, isemm=(not self.skip_emm), isnrm=(not self.skip_nrm), isspm=(not self.skip_spm))
         print("armature: ", g1m.arm)
         print("Meshes: ", [e.name for e in g1m.meshes])
         # for ob in g1m.meshes:
@@ -2637,6 +2636,8 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         g1m.arm["kidsob_dict"] = g1m.kidsob_dict
         g1m.arm["tex_dir"] = str(tex_dir)
         g1m.arm["vgmaps"] = json.dumps(g1m.vgmaps)
+        g1m.arm["metadata"] = json.dumps(g1m.metadata)
+        g1m.arm["ktid_name"] = g1m.ktid_name
         print("g1m_backup" in g1m.arm)
         # print(md5_bytes(g1m.arm["g1m_backup"]))
         g1m.debug_print_g1ts()
@@ -3246,14 +3247,11 @@ class IMAGE_OT_ReloadAll(bpy.types.Operator):
         return bpy.data.images
 
     def execute(self, context):
+        AocG1mExporter = context.scene.Aoc_G1m_Exporter
         # Iterate through all images and reload them
-        for image in bpy.data.images:
-            if "dds_path" in image:
-                image = import_dds(image["dds_path"], is_overwrite=True)
-                self.report({'INFO'}, f"Reloaded dds {image.name}")
-            elif image.source == 'FILE':
-                image.reload()
-                self.report({'INFO'}, f"Reloaded {image.name}")
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        if arm is not None:
+            reload_images(arm)
 
         return {'FINISHED'}
 
@@ -3283,84 +3281,75 @@ class OBJECT_OT_Export(Operator):
         AocG1mExporter = context.scene.Aoc_G1m_Exporter
         dest_dir = Path(AocG1mExporter.destination_path)
         context = bpy.context
+        g1m = G1Mmodel()
         arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        if arm is None:
-            arm = next((o for o in bpy.data.objects if o.type=="ARMATURE" and "g1m_backup" in o), None)
+        # if arm is None:
+        #     arm = next((o for o in bpy.data.objects if o.type=="ARMATURE" and "g1m_backup" in o), None)
         if arm is None:
             return {'CANCELLED'}
-        bpy.ops.object.mode_set(mode='OBJECT')
-        meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
-        arm.scale = (100.0,100.0,100.0)
-        rotate_object_X_quat(arm, -90)
-        apply_transforms([arm])
-        apply_transforms(meshes)
-        g1m = G1Mmodel()
-        if arm["renamed_bones"]:
-            rename_bones(arm, g1m.botw_bones_rev)
-            for ob in meshes:
-                for vg in ob.vertex_groups:
-                    vg.name = g1m.botw_bones_rev.get(vg.name, vg.name)
-        
-        
-        
-        for ob in meshes:
-            for uvmap in ob.data.uv_layers:
-                uvmap.name = 'TEXCOORD.xy'
+        if AocG1mExporter.is_g1m_export:
+            prepare_for_export(arm, g1m)
         
         if AocG1mExporter.only_selected_objects:
-            meshes = [o for o in bpy.data.objects if o in context.selected_objects]
+            meshes = [o for o in bpy.data.objects if o in context.selected_objects and o.parent==arm]
+        else:
+            meshes = [o for o in bpy.data.objects if  o.parent==arm]
+
         g1m.g1m_hash = arm.name
         g1m.g1m_data = arm["g1m_backup"]
         g1m.ktid_dict = arm["ktid_dict"]
         g1m.kidsob_dict = arm["kidsob_dict"]
+        g1m.metadata = json.loads(arm["metadata"])
         vgmaps = json.loads(arm["vgmaps"])
-        print(json.dumps(vgmaps, indent=4))
+        # print(json.dumps(vgmaps, indent=4))
         
         temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
-        g1m.temp_path = temp_path
-        remove_dir_if_exists(temp_path)
-        temp_path.mkdir()
-        for m in meshes:
-            name = m.name.split(".")[0] if "." in m.name else m.name
-            vb_path = str(temp_path / f"{name}.vb")
-            ib_path = str(temp_path / f"{name}.ib")
-            fmt_path = str(temp_path / f"{name}.fmt")
-            ini_path = str(temp_path / f"{name}_generated.ini")
-            vgmap = export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
-            # if not is_vgmap_correct(m, vgmap):
-            #     print(f"ERROR: missing vg names in vgmap for {m.name}")
-            #     new_vgmap = generate_vgmap(m, vgmaps)
-            #     apply_vgmap(self, context, targets=[m], filepath=new_vgmap, rename=True, cleanup=True)
-            #     export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
-                
-        for file in temp_path.glob("*.vb"):
-            newfile = file.with_suffix(".ib")
-            file.rename(newfile)
-        for file in temp_path.glob("*.vb0"):
-            newfile = file.with_suffix(".vb")
-            file.rename(newfile)
-        new_g1m_data = build_g1m_from_binary(g1m)
-        remove_dir_if_exists(temp_path)
-        dest_path = dest_dir / f"{g1m.g1m_hash}.g1m"
-        if dest_path.exists():
-            shutil.copyfile(str(dest_path), str(dest_path.with_suffix(".bak")))
-        dest_path.write_bytes(new_g1m_data)
+        if AocG1mExporter.is_g1m_export:
+            g1m.temp_path = temp_path
+            remove_dir_if_exists(temp_path)
+            temp_path.mkdir()
+            for m in meshes:
+                name = m.name.split(".")[0] if "." in m.name else m.name
+                vb_path = str(temp_path / f"{name}.vb")
+                ib_path = str(temp_path / f"{name}.ib")
+                fmt_path = str(temp_path / f"{name}.fmt")
+                ini_path = str(temp_path / f"{name}_generated.ini")
+                vgmap = export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
+                # if not is_vgmap_correct(m, vgmap):
+                #     print(f"ERROR: missing vg names in vgmap for {m.name}")
+                #     new_vgmap = generate_vgmap(m, vgmaps)
+                #     apply_vgmap(self, context, targets=[m], filepath=new_vgmap, rename=True, cleanup=True)
+                #     export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
+                    
+            for file in temp_path.glob("*.vb"):
+                newfile = file.with_suffix(".ib")
+                file.rename(newfile)
+            for file in temp_path.glob("*.vb0"):
+                newfile = file.with_suffix(".vb")
+                file.rename(newfile)
+            new_g1m_data = build_g1m_from_binary(g1m)
+            remove_dir_if_exists(temp_path)
+            dest_path = dest_dir / f"{g1m.g1m_hash}.g1m"
+            if dest_path.exists():
+                shutil.copyfile(str(dest_path), str(dest_path.with_suffix(".bak")))
+            dest_path.write_bytes(new_g1m_data)
         
-        arm.scale = (0.01, 0.01,0.01)
-        rotate_object_X_quat(arm, 90)
-        apply_transforms([arm])
-        apply_transforms(meshes)
-        
-        for ob in meshes:
-            for uvmap in ob.data.uv_layers:
-                uvmap.name = 'UVMap'
+            revert_after_export(arm, g1m)
         
         #textures
-        tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
-        print("tex_dir", tex_dir)
-        # dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
-        dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
-        g1m.pack_g1ts(tex_dir, dest_tex_dir)
+        if AocG1mExporter.is_g1t_export:
+            tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
+            print("tex_dir", tex_dir)
+            # dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
+            dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
+            g1m.pack_g1ts(tex_dir, dest_tex_dir)
+
+        if AocG1mExporter.is_ktid_export:
+            name = arm["ktid_name"] if "ktid_name" in arm else "file"
+            p = dest_dir / f"{g1m.g1m_hash}_textures" / f"{name}.ktid"
+            p.parent.mkdir(parents=True, exist_ok=True)
+            ktid_dict_to_binary_file(g1m.ktid_dict, p)
+            #TODO ktid save
         
         
 
@@ -3403,32 +3392,45 @@ class OBJECT_PT_AocExportPanel(Panel):
         except:
             pass
         
-        layout.prop(AocG1mExporter, "directory_path")
-        layout.operator("object.select_directory", text="Update")
+        layout.prop(AocG1mExporter, "directory_path", text="Dump Path")
+        # layout.operator("object.select_directory", text="Update")
         layout.prop(AocG1mExporter, "destination_path")
         # layout.operator("object.select_directory")
         
         layout.prop(AocG1mExporter, "g1ms_list", text="G1Ms")
         
-        layout.prop(AocG1mExporter, "only_selected_objects", text="Only Selected Objects")
         layout.operator("image.reload_all", text="Reload All Images")
         # update_directory_path(self, context, AocG1mExporter)
         # Check if there is at least one armature
-        if bpy.data.objects and any(obj.type == 'ARMATURE' for obj in bpy.data.objects):
-            layout.operator("object.export_g1m", text="Export")
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        if arm is not None:
+            layout.label(text="Export options")
+            layout.prop(AocG1mExporter, "is_g1m_export", text="G1m")
+            layout.prop(AocG1mExporter, "is_g1t_export", text="G1t")
+            layout.prop(AocG1mExporter, "is_ktid_export", text="Ktid")
+            layout.prop(AocG1mExporter, "only_selected_objects", text="Only Selected Objects")
+            if AocG1mExporter.is_g1m_export or AocG1mExporter.is_g1t_export or AocG1mExporter.is_ktid_export:
+                layout.operator("object.export_g1m", text="Export")
+
+def get_dump_path(self, context):
+    return get_aoc_files_path_str()
 
 def update_directory_path(self, context,AocG1mExporter):
     if not AocG1mExporter.directory_path or AocG1mExporter.directory_path!="NONE":
         AocG1mExporter.directory_path = get_aoc_files_path_str()
 
+def save_dump_path(self, context):
+    if context.scene.Aoc_G1m_Exporter.directory_path:
+        save_aoc_files_path(context.scene.Aoc_G1m_Exporter.directory_path)
 
 class AocPath(PropertyGroup):
     directory_path: StringProperty(
         name="Dump Path",
         description="Path to a directory with Age of Calamity raw files extracted",
-        default="",
+        default=str(get_aoc_files_path_str()),
         maxlen=1024,
         subtype='DIR_PATH',
+        update=save_dump_path
     )
     destination_path: StringProperty(
         name="export path",
@@ -3445,6 +3447,21 @@ class AocPath(PropertyGroup):
     only_selected_objects: BoolProperty(
         name="Only Selected Objects",
         description="Export only selected armature objects",
+        default=False
+    )
+    is_g1m_export: BoolProperty(
+        name="g1m export",
+        description="Export g1m file",
+        default=True
+    )
+    is_g1t_export: BoolProperty(
+        name="g1t export",
+        description="Export g1t files",
+        default=True
+    )
+    is_ktid_export: BoolProperty(
+        name="Ktid",
+        description="Export ktid file",
         default=False
     )
 

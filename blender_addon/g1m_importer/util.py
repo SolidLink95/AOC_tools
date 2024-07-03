@@ -1,4 +1,5 @@
 import hashlib
+from io import BytesIO
 import os
 import shutil
 import sys
@@ -8,6 +9,59 @@ import bpy
 import math
 from mathutils import Quaternion, Vector, Euler
 # from tkinter import filedialog
+
+
+def reload_images(arm):
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    for obj in meshes:
+        for material_slot in obj.material_slots:
+            mat = material_slot.material
+            if mat and mat.use_nodes:
+                for node in mat.node_tree.nodes:
+                    if node.type == 'TEX_IMAGE':
+                        if node.image:
+                            if "dds_path" in node.image:
+                                dds_path = str(node.image["dds_path"])
+                                bpy.data.images.remove(node.image)
+                                new_im = import_dds(dds_path, is_overwrite=True)
+                                node.image = new_im
+
+    for im in bpy.data.images:
+        if "dds_path" in im:
+            dds_path = str(im["dds_path"])
+            new_im = import_dds(dds_path, is_overwrite=True)
+
+def revert_after_export(arm, g1m):
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    arm.scale = (0.01, 0.01,0.01)
+    rotate_object_X_quat(arm, 90)
+    apply_transforms([arm])
+    apply_transforms(meshes)
+    if arm["renamed_bones"]:
+        rename_bones(arm, g1m.botw_bones)
+        for ob in meshes:
+            for vg in ob.vertex_groups:
+                vg.name = g1m.botw_bones.get(vg.name, vg.name)
+
+    for ob in meshes:
+        for uvmap in ob.data.uv_layers:
+            uvmap.name = 'UVMap'
+
+def prepare_for_export(arm, g1m):
+    bpy.ops.object.mode_set(mode='OBJECT')
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    arm.scale = (100.0,100.0,100.0)
+    rotate_object_X_quat(arm, -90)
+    apply_transforms([arm])
+    apply_transforms(meshes)
+    if arm["renamed_bones"]:
+        rename_bones(arm, g1m.botw_bones_rev)
+        for ob in meshes:
+            for vg in ob.vertex_groups:
+                vg.name = g1m.botw_bones_rev.get(vg.name, vg.name)
+    for ob in meshes:
+        for uvmap in ob.data.uv_layers:
+            uvmap.name = 'TEXCOORD.xy'
 
 # from tqdm import tk
 def is_vgmap_correct(ob, vgmap):
@@ -74,6 +128,13 @@ def get_aoc_files_path_str():
     tmp = get_aoc_files_path()
     return "NONE" if tmp is None else tmp
 
+def save_aoc_files_path(p):
+    res = {"aoc_path": str(p)}
+    json_path = Path(os.path.expandvars("%localappdata%/AgeOfCalamity/aoc_config.json"))
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(json.dumps(res, indent=4))
+
+    
 def get_aoc_files_path():
     json_path = Path(os.path.expandvars("%localappdata%/AgeOfCalamity/aoc_config.json"))
     try:
@@ -108,6 +169,13 @@ def is_name_duplicate(name):
     
     
     return True
+
+
+class StringBytesIO(BytesIO):
+    def write(self, data):
+        if isinstance(data, str):
+            data = data.encode()
+        super().write(data)
 
 
 def create_armature_from_bone_list(skel_data):
@@ -188,7 +256,9 @@ def import_dds(dds_path, is_overwrite=False):
             return None
         
         filepath = str(dds_path)
-        if bpy.data.images.get(dds_path.stem) and is_overwrite:
+        pos_im = bpy.data.images.get(dds_path.stem)
+        if pos_im and is_overwrite:
+            pos_im["dds_path"] = str(dds_path)
             return bpy.data.images[dds_path.stem]
         bpy.ops.dds.import_dds(filepath=filepath, files=[{"name":dds_path.name, "name":dds_path.name}], directory=str(dds_path.parent))
         im = bpy.data.images[dds_path.stem]

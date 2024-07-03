@@ -1,7 +1,7 @@
 import io
 import json
 from pathlib import Path
-import g1t_module as g1t_module
+import g1m_importer.g1t_module as g1t_module
 import hashlib, re
 
 def fileToMd5(file):

@@ -20,6 +20,7 @@ class G1Mmodel():
         self.path: Path = None
         self.g1m_hash = None
         self.g1m_data = None
+        self.ktid_name = "file"
         self.ktid_dict = {}
         self.kidsob_dict = {}
         self.metadata = {}
@@ -97,10 +98,13 @@ class G1Mmodel():
                 if g1t_path is None:
                     print("G1T file not found: ", g1t_hash)
                 else:
-                    g1t = G1T(g1t_path)
-                    g1t.dds[int(ind)] = dds_data
-                    dest_dir.mkdir(parents=True, exist_ok=True)
-                    g1t.save_file(dest_dir / f"{g1t_hash}.g1t")
+                    try:
+                        g1t = G1T(g1t_path)
+                        g1t.dds[int(ind)] = dds_data
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        g1t.save_file(dest_dir / f"{g1t_hash}.g1t")
+                    except:
+                        print(f"Error processing: {dds_file.name}")
                     
         
             
@@ -233,9 +237,11 @@ class G1Mmodel():
     def update_ktid_from_path(self, ktidpath):
         if ktidpath is not None:
             self.ktid_dict = ktid_file_to_dict(ktidpath)
+            self.ktid_name = Path(ktidpath).stem
         else:
             ktid_hash = g1m_to_g1t_hashes.get(self.g1m_hash, {}).get("g1t", None)
             if ktid_hash is not None:
+                self.ktid_name = ktid_hash
                 ktid_path = self.find_ktid(ktid_hash)
                 if ktid_path is not None:
                     self.ktid_dict = ktid_file_to_dict(ktid_path)

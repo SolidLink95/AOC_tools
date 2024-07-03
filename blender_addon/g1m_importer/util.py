@@ -7,8 +7,53 @@ import json
 from pathlib import Path
 import bpy
 import math
+from copy import deepcopy
 from mathutils import Quaternion, Vector, Euler
 # from tkinter import filedialog
+
+def duplicate_object(ob):
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+
+    bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((0, 0, 0), (0, 0, 0), (0, 0, 0)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
+    return bpy.context.view_layer.objects.active
+
+def duplicate_g1m_object(arm, ob):
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    new_ind = len(meshes)
+    new_name = f"{new_ind}.vb"
+    g1m_hash = arm.name
+    index = ob.name.split(".")[0] if "." in ob.name else ob.name
+    index = int(index)
+
+    metadata = json.loads(arm["metadata"])
+    new_ob = duplicate_object(ob)
+    # new_ob = ob.copy()
+    # new_ob.data = ob.data.copy()
+    new_ob.name = new_name
+    new_ob.data.name = new_name
+    # collection = bpy.context.collection
+    # collection.objects.link(new_ob)
+    for s, section in enumerate(metadata.get("sections", [])):
+        ttype = section.get("type", "")
+        if ttype == "SUBMESH":
+            section["count"] += 1
+            new_submesh = deepcopy(section["data"][index])
+            new_submesh["id_referenceonly"] = new_ind
+            section["data"].append(new_submesh)
+        elif ttype == "MESH_LOD":
+            for i, elem in enumerate(section["data"]):
+                for k, lod in enumerate(elem["lod"]):
+                    if index in lod["indices"]:
+                        metadata["sections"][s]["data"][i]["lod"][k]["indices"].append(new_ind)
+                        metadata["sections"][s]["data"][i]["lod"][k]["indexCount"] += 1
+
+
+
+    arm["metadata"] = json.dumps(metadata)
+
 
 
 def update_materials_after_index_update(arm):

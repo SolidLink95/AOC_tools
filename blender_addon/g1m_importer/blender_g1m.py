@@ -3267,7 +3267,7 @@ def get_armatures(self, context):
         items = [("None", "No G1MS Found", "")]
     return items
 
-class IMAGE_OT_ReloadAll(bpy.types.Operator):
+class IMAGE_OT_ReloadAllG1mImages(bpy.types.Operator):
     """Reload All Images from Disk"""
     bl_idname = "image.reload_all"
     bl_label = "Reload All Images"
@@ -3286,6 +3286,31 @@ class IMAGE_OT_ReloadAll(bpy.types.Operator):
             reload_images(arm)
 
         return {'FINISHED'}
+
+class G1M_duplicate_mesh(bpy.types.Operator):
+    """Reload All Images from Disk"""
+    bl_idname = "object.duplicate_g1m_mesh"
+    bl_label = "Duplicate currently selected mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                duplicate_g1m_object(arm, cur_ob)
+                self.report({'INFO'}, f"Updated duplicated mesh: {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to duplicated mesh")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to duplicate mesh")
+        return self.execute(context)
 
 class OBJECT_OT_Export(Operator):
     bl_idname = "object.export_g1m"
@@ -3415,6 +3440,7 @@ class OBJECT_PT_AocExportPanel(Panel):
             row.prop(AocG1mExporter, "material_index", text="Material")
             row.prop(AocG1mExporter, "shaderparam_index", text="ShaderParam")
             layout.operator("object.update_meshes_indexes", text="Update Indexes")
+            layout.operator("object.duplicate_g1m_mesh", text="Duplicate mesh")
             layout.separator() 
         except:
             cur_ob = None
@@ -3473,7 +3499,14 @@ def get_material_indexes(self, context):
     AocG1mExporter = scene.Aoc_G1m_Exporter
     arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
     if arm is not None:
-        return [(str(i), str(i), "") for i in range(int(arm["materials_count"]))]
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            first_elem = (str(cur_ob["materialIndex"]), str(cur_ob["materialIndex"]), "")
+        except:
+            first_elem = ("0", "0", "")
+        res = [first_elem]
+        res += [(str(i), str(i), "") for i in range(int(arm["materials_count"])) if str(i) != first_elem[0]]
+        return res
     return [("None", "No G1MS Found", "")]
 
 def get_shaderparam_indexes(self, context):
@@ -3481,7 +3514,13 @@ def get_shaderparam_indexes(self, context):
     AocG1mExporter = scene.Aoc_G1m_Exporter
     arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
     if arm is not None:
-        return [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"]))]
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            res = [(str(cur_ob["shaderParamIndex"]), str(cur_ob["shaderParamIndex"]), "")]
+        except:
+            res = [("0", "0", "")]
+        res += [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"])) if str(i) != res[0][0]]
+        return res
     return [("None", "No G1MS Found", "")]
 
 
@@ -3540,8 +3579,9 @@ class AocPath(PropertyGroup):
 
 exporter_classes = [
     # AocPath,
+    G1M_duplicate_mesh,
     OBJECT_OT_UpdateMeshesIndexes,
-    IMAGE_OT_ReloadAll,
+    IMAGE_OT_ReloadAllG1mImages,
     OBJECT_OT_SelectDirectory,
     OBJECT_OT_Export,
     OBJECT_PT_AocExportPanel,

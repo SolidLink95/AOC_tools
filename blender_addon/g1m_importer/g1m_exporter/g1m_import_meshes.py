@@ -230,7 +230,8 @@ def build_composite_buffers(g1m_name, model_mesh_metadata, g1mg_stream, skel_dat
                             vgmap = read_struct_from_json("{0}/{1}.vgmap".format(g1m_name, existing_submeshes[j]))
                             # Proceed only if a complete skeleton is available
                             if skel_data['jointCount'] > 1 and not skel_data['boneList'][0]['parentID'] < -200000000:
-                                correct_vgmap = generate_vgmap(subvbs['data'][existing_submeshes[j]]['bonePaletteIndex'], model_mesh_metadata, skel_data)
+                                # correct_vgmap = generate_vgmap(subvbs['data'][existing_submeshes[j]]['bonePaletteIndex'], model_mesh_metadata, skel_data)
+                                correct_vgmap = vgmap
                                 if 'BLENDINDICES' in [x['SemanticName'] for x in vb]:
                                     bl_idx = vb[[x['SemanticName'] for x in vb].index('BLENDINDICES')]['Buffer']
                                     used_bones = sorted(list(set([x for y in bl_idx for x in y])))
@@ -538,7 +539,9 @@ def build_g1mg(g1m, skel_data, e = '<'):
 
 def build_g1m(g1m_name):
     with open(g1m_name + '.g1m', "rb") as f:
-        return build_g1m_from_binary(g1m_name, f.read(), g1m_name)
+        g1m = G1Mmodel()
+        g1m.g1m_data = f.read()
+        return build_g1m_from_binary(g1m)
     
 def build_g1m_from_binary(g1m):
     # if os.path.exists(g1m_name) and (os.path.isdir(g1m_name)):
@@ -571,6 +574,7 @@ def build_g1m_from_binary(g1m):
         if chunk["magic"] in ['G1MS', 'SM1G'] and have_skeleton == False:
             f.seek(chunk["start_offset"],0)
             model_skel_data = parseG1MS(f.read(chunk["size"]),e)
+            # json_path = Path(g1m_name) / '/skeleton.json'
             # if os.path.exists(g1m_name+'Oid.bin'):
             #     model_skel_oid = binary_oid_to_dict(g1m_name+'Oid.bin')
             #     model_skel_data = name_bones(model_skel_data, model_skel_oid)

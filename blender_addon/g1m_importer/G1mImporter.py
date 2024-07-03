@@ -65,7 +65,21 @@ class G1Mmodel():
                 print(f"G1T hash  not found for KTID: {ktid_hash}")
     
         
-
+    def prepare_meshes_for_export(self, vgmaps):
+        print("\n\n Preparing meshes for export\n\n")
+        for m in self.meshes:
+            is_updated = False
+            vgmap = m["3DMigoto:VGMap:"]
+            for vg in m.vertex_groups:
+                if vg.name not in vgmap:
+                    print(f"Vg {vg.name} missing in {m.name}, attempting to fix...")
+                    if vg.name not in vgmaps.keys():
+                        e = f"Vg {vg.name} not found in vgmaps"
+                        raise ValueError(e)
+                    vgmap[vg.name] = vgmaps[vg.name]
+                    is_updated = True
+            if is_updated:
+                m["3DMigoto:VGMap:"] = vgmap
 
     def tex_ktid_index_to_str_name(self, ktid_ind):
         int_ktid_ind = int(ktid_ind)
@@ -266,6 +280,14 @@ class G1Mmodel():
                     section["data"][index]["shaderParamIndex"] = int(m["shaderParamIndex"])
 
     
+    def get_ktid_hash_from_g1t_hash(self, g1t_hash):
+        for main_hash, kidso_data in self.kidsob_dict.items():
+            for pos_ktid_hash, tex_list in kidso_data.items():
+                for tex_hash in tex_list:
+                    if g1t_hash == tex_hash:
+                        return main_hash
+        return None
+        
     def get_g1t_hash_from_ktid_hash(self, ktid_hash, ind):
         for main_hash, kidso_data in self.kidsob_dict.items():
             for pos_ktid_hash, tex_list in kidso_data.items():
@@ -370,14 +392,39 @@ class G1Mmodel():
                 for vg in ob.vertex_groups:
                     vg.name = self.botw_bones.get(vg.name, vg.name)
     
-    def debug_print_g1ts(self):
+    def save_ktid(self, dest_dir, tex_dir):
+        print(f"Saving KTID to {dest_dir}")
+        path = tex_dir / "ktid.json"
+        if not path.exists():
+            return
+        ktid_dict = json.loads(path.read_text())
+        res = {}
+        for ind, g1t_hash in ktid_dict.items():
+            pos_hash = self.get_ktid_hash_from_g1t_hash(g1t_hash)
+            if pos_hash is None:
+                print(f"KTID hash not found for G1T hash: {g1t_hash}, skipping ktid saving")
+                return
+            res[ind] = pos_hash
+        destfile = dest_dir / f"{self.ktid_name}.ktid"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        print(res)
+        with open(destfile, "wb") as f:
+            f.write(ktid_dict_to_binary(res))
+
+    
+    def debug_print_g1ts(self, dest_dir):
         print("\n")
+        res = {}
         for ind, ktid_hash in self.ktid_dict.items():
+            res[ind] = {}
             for _, g1t in self.g1ts.items():
                 _, _, g1t_hash, ktid_ind = g1t["dds_name"][:-4].split("_")
                 if ktid_ind == ind:
                     print(f"KTID ind: {ind} hash {ktid_hash} G1T hash: {g1t_hash}")
+                    res[ind] = g1t_hash
                     break
+        with open(dest_dir / "ktid.json", "w") as f:
+            f.write(json.dumps(res, indent=4))
                 
     
     

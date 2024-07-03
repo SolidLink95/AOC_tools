@@ -1030,7 +1030,7 @@ def import_normals_step2(mesh):
     #mesh.show_edge_sharp = True
 
 def import_vertex_groups(mesh, obj, blend_indices, blend_weights):
-    assert(len(blend_indices) == len(blend_weights))
+    # assert(len(blend_indices) == len(blend_weights))
     if blend_indices:
         # We will need to make sure we re-export the same blend indices later -
         # that they haven't been renumbered. Not positive whether it is better
@@ -2622,12 +2622,17 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         if self.tex_from_dump:    
             stdout_capture = io.StringIO()
             stderr_capture = io.StringIO()
-
+            tmp_stdout = sys.stdout
+            tmp_stderr = sys.stderr
+            sys.stdout = stdout_capture
+            sys.stderr = stderr_capture
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
                 g1m.get_g1t_data_from_dump(g1ts=g1ts)
                 tex_dir.mkdir(parents=True, exist_ok=True)
                 g1m.extract_g1t_textures(tex_dir)
                 g1m.generate_materials(tex_dir, isemm=(not self.skip_emm), isnrm=(not self.skip_nrm), isspm=(not self.skip_spm))
+            sys.stdout = tmp_stdout
+            sys.stderr = tmp_stderr
         print("armature: ", g1m.arm)
         print("Meshes: ", [e.name for e in g1m.meshes])
         # for ob in g1m.meshes:
@@ -2643,7 +2648,7 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         g1m.arm["ktid_name"] = g1m.ktid_name
         print("g1m_backup" in g1m.arm)
         # print(md5_bytes(g1m.arm["g1m_backup"]))
-        g1m.debug_print_g1ts()
+        g1m.debug_print_g1ts(tex_dir)
         
         self.report({'INFO'}, f'Imported G1M file {g1m_name}')
         return {'FINISHED'}
@@ -2877,6 +2882,22 @@ def apply_vgmap(operator, context, targets=None, filepath='', commit=False, reve
             operator.report({'WARNING'}, '%s is not a 3DMigoto mesh. Vertex Group Map custom property applied anyway' % obj.name)
         else:
             operator.report({'INFO'}, 'Applied vgmap to %s' % obj.name)
+
+def update_vgmap_for_ob(obj, vg_step=1):
+    vgmaps = {k:keys_to_ints(v) for k,v in obj.items() if k.startswith('3DMigoto:VGMap:')}
+    if not vgmaps:
+        raise Fatal('Selected object has no 3DMigoto vertex group maps')
+    for (suffix, vgmap) in vgmaps.items():
+        highest = max(vgmap.values())
+        for vg in obj.vertex_groups.keys():
+            if vg.isdecimal():
+                continue
+            if vg in vgmap:
+                continue
+            highest += vg_step
+            vgmap[vg] = highest
+            print('Assigned named vertex group %s = %i' % (vg, vgmap[vg]))
+        obj[suffix] = vgmap
 
 def update_vgmap(operator, context, vg_step=1):
     if not context.selected_objects:
@@ -3262,7 +3283,7 @@ class OBJECT_OT_UpdateMeshesIndexes(Operator):
         return self.execute(context)
 
 def get_armatures(self, context):
-    items = [(obj.name, obj.name, "") for obj in bpy.data.objects if obj.type == 'ARMATURE' and "g1m_backup" in obj]
+    items = [(obj.name, obj.name, "") for obj in bpy.data.objects if obj.type == 'ARMATURE' and "g1m_backup" in obj and not obj.hide_viewport]
     if not items:
         items = [("None", "No G1MS Found", "")]
     return items
@@ -3312,7 +3333,7 @@ class G1M_duplicate_mesh(bpy.types.Operator):
         self.report({'INFO'}, "Preparing to duplicate mesh")
         return self.execute(context)
 
-class OBJECT_OT_Export(Operator):
+class OBJECT_OT_G1M_Export(Operator):
     bl_idname = "object.export_g1m"
     bl_label = "Export G1M"
     
@@ -3363,10 +3384,12 @@ class OBJECT_OT_Export(Operator):
         temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
         if AocG1mExporter.is_g1m_export:
             g1m.update_metadata_from_scene()
+            # g1m.prepare_meshes_for_export(vgmaps)
             g1m.temp_path = temp_path
             remove_dir_if_exists(temp_path)
             temp_path.mkdir(parents=True, exist_ok=True)
             for m in meshes:
+                update_vgmap_for_ob(m)
                 name = m.name.split(".")[0] if "." in m.name else m.name
                 vb_path = str(temp_path / f"{name}.vb")
                 ib_path = str(temp_path / f"{name}.ib")
@@ -3395,18 +3418,16 @@ class OBJECT_OT_Export(Operator):
             revert_after_export(arm, g1m)
         
         #textures
+        tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
+        dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
         if AocG1mExporter.is_g1t_export:
-            tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
             print("tex_dir", tex_dir)
             # dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
-            dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
             g1m.pack_g1ts(tex_dir, dest_tex_dir)
-
+        print('is ktid export', AocG1mExporter.is_ktid_export)
         if AocG1mExporter.is_ktid_export:
-            name = arm["ktid_name"] if "ktid_name" in arm else "file"
-            p = dest_dir / f"{g1m.g1m_hash}_textures" / f"{name}.ktid"
-            p.parent.mkdir(parents=True, exist_ok=True)
-            ktid_dict_to_binary_file(g1m.ktid_dict, p)
+            g1m.ktid_name = arm["ktid_name"] if "ktid_name" in arm else "file"
+            g1m.save_ktid( dest_tex_dir, tex_dir)
             #TODO ktid save
         
         self.report({'INFO'}, f"Exported {len(meshes)} into g1m file {g1m.g1m_hash}.g1m")
@@ -3583,7 +3604,7 @@ exporter_classes = [
     OBJECT_OT_UpdateMeshesIndexes,
     IMAGE_OT_ReloadAllG1mImages,
     OBJECT_OT_SelectDirectory,
-    OBJECT_OT_Export,
+    OBJECT_OT_G1M_Export,
     OBJECT_PT_AocExportPanel,
 ]
 

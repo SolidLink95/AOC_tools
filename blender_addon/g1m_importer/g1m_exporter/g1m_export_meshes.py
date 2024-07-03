@@ -1159,7 +1159,7 @@ def write_submeshes(G1Mob,g1mg_stream, model_mesh_metadata, skel_data, nun_maps,
             G1Mob.files['{0}{1}.vgmap'.format(path, subindex)] = json.dumps(submesh['vgmap'], indent=4).encode("utf-8")
             # with open('{0}{1}.vgmap'.format(path, subindex), 'wb') as f:
             #     f.write(json.dumps(submesh['vgmap'], indent=4).encode("utf-8"))
-        print(subindex,  [x['indices'] for x in lod_data['data'][0]['lod']])
+        # print(subindex,  [x['indices'] for x in lod_data['data'][0]['lod']])
         submesh_lod = [x for x in lod_data['data'][0]['lod'] if subindex in x['indices']][0]
         if cloth_render_fail == False:
             try:

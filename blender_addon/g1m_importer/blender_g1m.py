@@ -2617,10 +2617,13 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         g1m.process_objects(rename_bones_flag=self.rename_bones)
         remove_dir_if_exists(path)
         #Process textures
+        g1m.set_mesh_properties()
         tex_dir = root_dir / Path(f"{g1m_name}_textures")
-        tmp_io = StringBytesIO()
         if self.tex_from_dump:    
-            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            stdout_capture = io.StringIO()
+            stderr_capture = io.StringIO()
+
+            with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
                 g1m.get_g1t_data_from_dump(g1ts=g1ts)
                 tex_dir.mkdir(parents=True, exist_ok=True)
                 g1m.extract_g1t_textures(tex_dir)
@@ -2642,6 +2645,7 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         # print(md5_bytes(g1m.arm["g1m_backup"]))
         g1m.debug_print_g1ts()
         
+        self.report({'INFO'}, f'Imported G1M file {g1m_name}')
         return {'FINISHED'}
         for filename in path.glob("*"):
             try:
@@ -3228,6 +3232,34 @@ class OBJECT_OT_SelectDirectory(Operator):
         context.scene.Aoc_G1m_Exporter.directory_path = str(p)
         # context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
+    
+class OBJECT_OT_UpdateMeshesIndexes(Operator):
+    bl_idname = "object.update_meshes_indexes"
+    bl_label = "Update Meshes Indexes"
+    # directory: StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        print("Updating indexes")
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                cur_ob["materialIndex"] = AocG1mExporter.material_index
+                cur_ob["shaderParamIndex"] = AocG1mExporter.shaderparam_index
+                update_materials_after_index_update(arm)
+                
+                self.report({'INFO'}, f"Updated indexes for {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to update indexes")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to update indexes")
+        return self.execute(context)
 
 def get_armatures(self, context):
     items = [(obj.name, obj.name, "") for obj in bpy.data.objects if obj.type == 'ARMATURE' and "g1m_backup" in obj]
@@ -3294,7 +3326,7 @@ class OBJECT_OT_Export(Operator):
             meshes = [o for o in bpy.data.objects if o in context.selected_objects and o.parent==arm]
         else:
             meshes = [o for o in bpy.data.objects if  o.parent==arm]
-
+        g1m.meshes = meshes
         g1m.g1m_hash = arm.name
         g1m.g1m_data = arm["g1m_backup"]
         g1m.ktid_dict = arm["ktid_dict"]
@@ -3305,9 +3337,10 @@ class OBJECT_OT_Export(Operator):
         
         temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
         if AocG1mExporter.is_g1m_export:
+            g1m.update_metadata_from_scene()
             g1m.temp_path = temp_path
             remove_dir_if_exists(temp_path)
-            temp_path.mkdir()
+            temp_path.mkdir(parents=True, exist_ok=True)
             for m in meshes:
                 name = m.name.split(".")[0] if "." in m.name else m.name
                 vb_path = str(temp_path / f"{name}.vb")
@@ -3351,7 +3384,7 @@ class OBJECT_OT_Export(Operator):
             ktid_dict_to_binary_file(g1m.ktid_dict, p)
             #TODO ktid save
         
-        
+        self.report({'INFO'}, f"Exported {len(meshes)} into g1m file {g1m.g1m_hash}.g1m")
 
         # Placeholder for actual export logic
         # self.report({'INFO'}, f"Exporting {len(armatures)} armature(s)...")
@@ -3369,12 +3402,23 @@ class OBJECT_PT_AocExportPanel(Panel):
         layout = self.layout
         scene = context.scene
         AocG1mExporter = scene.Aoc_G1m_Exporter
+        layout.label(text="AOC G1M Export")
         try:
             cur_ob = bpy.context.view_layer.objects.active
+            layout.separator() 
+            layout.label(text=f"Selected object: {cur_ob.name}")
+            row = layout.row()
+            row.label(text=f"materialIndex: {cur_ob['materialIndex']}")
+            row.label(text=f"shaderParamIndex: {cur_ob['shaderParamIndex']}")
+            layout.label(text=f"Indexes")
+            row = layout.row()
+            row.prop(AocG1mExporter, "material_index", text="Material")
+            row.prop(AocG1mExporter, "shaderparam_index", text="ShaderParam")
+            layout.operator("object.update_meshes_indexes", text="Update Indexes")
+            layout.separator() 
         except:
             cur_ob = None
         
-        layout.label(text="AOC G1M Export")
         try:
             s_obs = [o for o in context.selected_objects if o.type == 'MESH']
             obs1 = cur_ob
@@ -3391,7 +3435,7 @@ class OBJECT_PT_AocExportPanel(Panel):
                     layout.label(text=", ".join([vg.name for vg in mismatched]))
         except:
             pass
-        
+
         layout.prop(AocG1mExporter, "directory_path", text="Dump Path")
         # layout.operator("object.select_directory", text="Update")
         layout.prop(AocG1mExporter, "destination_path")
@@ -3405,9 +3449,10 @@ class OBJECT_PT_AocExportPanel(Panel):
         arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
         if arm is not None:
             layout.label(text="Export options")
-            layout.prop(AocG1mExporter, "is_g1m_export", text="G1m")
-            layout.prop(AocG1mExporter, "is_g1t_export", text="G1t")
-            layout.prop(AocG1mExporter, "is_ktid_export", text="Ktid")
+            row= layout.row()
+            row.prop(AocG1mExporter, "is_g1m_export", text="G1m",)
+            row.prop(AocG1mExporter, "is_g1t_export", text="G1t")
+            row.prop(AocG1mExporter, "is_ktid_export", text="Ktid")
             layout.prop(AocG1mExporter, "only_selected_objects", text="Only Selected Objects")
             if AocG1mExporter.is_g1m_export or AocG1mExporter.is_g1t_export or AocG1mExporter.is_ktid_export:
                 layout.operator("object.export_g1m", text="Export")
@@ -3422,6 +3467,23 @@ def update_directory_path(self, context,AocG1mExporter):
 def save_dump_path(self, context):
     if context.scene.Aoc_G1m_Exporter.directory_path:
         save_aoc_files_path(context.scene.Aoc_G1m_Exporter.directory_path)
+
+def get_material_indexes(self, context):
+    scene = context.scene
+    AocG1mExporter = scene.Aoc_G1m_Exporter
+    arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+    if arm is not None:
+        return [(str(i), str(i), "") for i in range(int(arm["materials_count"]))]
+    return [("None", "No G1MS Found", "")]
+
+def get_shaderparam_indexes(self, context):
+    scene = context.scene
+    AocG1mExporter = scene.Aoc_G1m_Exporter
+    arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+    if arm is not None:
+        return [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"]))]
+    return [("None", "No G1MS Found", "")]
+
 
 class AocPath(PropertyGroup):
     directory_path: StringProperty(
@@ -3443,6 +3505,16 @@ class AocPath(PropertyGroup):
         name="G1M List",
         description="Select G1M file to export",
         items=get_armatures
+    )
+    material_index: EnumProperty(
+        name="Material Index",
+        description="Material index of g1m mesh",
+        items=get_material_indexes
+    )
+    shaderparam_index: EnumProperty(
+        name="ShaderParam Index",
+        description="ShaderParam index of g1m mesh",
+        items=get_shaderparam_indexes
     )
     only_selected_objects: BoolProperty(
         name="Only Selected Objects",
@@ -3468,6 +3540,7 @@ class AocPath(PropertyGroup):
 
 exporter_classes = [
     # AocPath,
+    OBJECT_OT_UpdateMeshesIndexes,
     IMAGE_OT_ReloadAll,
     OBJECT_OT_SelectDirectory,
     OBJECT_OT_Export,
@@ -3496,6 +3569,7 @@ register_classes = (
     Merge3DMigotoPose,
     DeleteNonNumericVertexGroups,
     ImportG1M3DMigotoRaw,
+    
 )
 
 def register():

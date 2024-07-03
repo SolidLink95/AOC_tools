@@ -64,6 +64,9 @@ class G1Mmodel():
             else:
                 print(f"G1T hash  not found for KTID: {ktid_hash}")
     
+        
+
+
     def tex_ktid_index_to_str_name(self, ktid_ind):
         int_ktid_ind = int(ktid_ind)
         for section in self.metadata.get("sections", []):
@@ -183,6 +186,13 @@ class G1Mmodel():
         return None
     
     def generate_materials(self, tex_dir, isemm=False, isnrm=True, isspm=True):
+        for section in self.metadata.get("sections", []):
+            if section.get("type", "") == "MATERIALS":
+                for i, mat_info in enumerate(section.get("data", [])):
+                    mat_name = f"{self.g1m_hash}_{mat_info.get('id_referenceonly', i)}"
+                    if bpy.data.materials.get(mat_name):
+                        bpy.data.materials.remove(bpy.data.materials[mat_name])
+                    mat = bpy.data.materials.new(mat_name)
         tex_dir = Path(tex_dir)
         mesh_to_mat_index = {}
         for section in self.metadata.get("sections", []):
@@ -223,7 +233,38 @@ class G1Mmodel():
                     # break
         for m in meshes:
             m.generate_material()                
-        
+    
+    def set_mesh_properties(self):
+        for m in self.meshes:
+            index = m.name.split(".")[0] if "." in m.name else m.name
+            try:
+                index = int(index)
+            except:
+                continue
+            for section in self.metadata.get("sections", []):
+                ttype = section.get("type", "")
+                if ttype == "SUBMESH":
+                    m["materialIndex"] = section["data"][index]["materialIndex"]
+                    m["shaderParamIndex"] = section["data"][index]["shaderParamIndex"]
+                elif ttype == "MATERIALS":
+                    self.arm["materials_count"] = str(section.get("count", len(section.get("data", []))))
+                elif ttype == "SHADER_PARAMS":
+                    self.arm["shaderParams_count"] = str(section.get("count", len(section.get("data", []))))
+
+    
+    def update_metadata_from_scene(self):
+        for m in self.meshes:
+            index = m.name.split(".")[0] if "." in m.name else m.name
+            try:
+                index = int(index)
+            except:
+                continue
+            for section in self.metadata.get("sections", []):
+                ttype = section.get("type", "")
+                if ttype == "SUBMESH":
+                    section["data"][index]["materialIndex"] = int(m["materialIndex"])
+                    section["data"][index]["shaderParamIndex"] = int(m["shaderParamIndex"])
+
     
     def get_g1t_hash_from_ktid_hash(self, ktid_hash, ind):
         for main_hash, kidso_data in self.kidsob_dict.items():
@@ -362,10 +403,14 @@ class G1mMesh():
         self.index = self.name.split(".")[0] if "." in self.name else None
     
     def generate_material(self):
-        mat_name = f"{self.g1m_hash}_{self.name}"
-        if bpy.data.materials.get(mat_name):
-            bpy.data.materials.remove(bpy.data.materials[mat_name])
-        mat = bpy.data.materials.new(mat_name)
+        mat_index = self.ob["materialIndex"]
+        # mat_name = f"{self.g1m_hash}_{self.name}"
+        mat_name = f"{self.g1m_hash}_{mat_index}"
+        pos_mat = bpy.data.materials.get(mat_name)
+        if not pos_mat:
+            pos_mat = bpy.data.materials.new(mat_name)
+            # bpy.data.materials.remove(bpy.data.materials[mat_name])
+        mat = pos_mat
         mat.use_nodes = True
         if self.ob.data.materials:
             self.ob.data.materials.clear()
@@ -436,7 +481,7 @@ class G1mMesh():
             return im
         except:
             return None
-    
+
 
 
 if __name__=="__main__":

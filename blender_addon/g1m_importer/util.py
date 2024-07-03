@@ -11,6 +11,31 @@ from mathutils import Quaternion, Vector, Euler
 # from tkinter import filedialog
 
 
+def update_materials_after_index_update(arm):
+    g1m_hash = arm.name
+    metadata = json.loads(arm["metadata"])
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    for m in meshes:
+        index = m.name.split(".")[0] if "." in m.name else m.name
+        try:
+            index = int(index)
+        except:
+            continue
+        for section in metadata.get("sections", []):
+            ttype = section.get("type", "")
+            if ttype == "SUBMESH":
+                section["data"][index]["materialIndex"] = int(m["materialIndex"])
+                section["data"][index]["shaderParamIndex"] = int(m["shaderParamIndex"])
+        if m.material_slots:
+            mat_name = f"{g1m_hash}_{m['materialIndex']}"
+            mat = bpy.data.materials.get(mat_name)
+            if mat:
+                m.material_slots[0].material = mat
+            else:
+                print(f"ERROR: Material {mat_name} not found for mesh {m.name}!")
+    
+    arm["metadata"] = json.dumps(metadata)
+
 def reload_images(arm):
     meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
     for obj in meshes:

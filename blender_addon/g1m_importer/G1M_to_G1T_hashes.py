@@ -1,5 +1,9 @@
 
 g1m_to_g1t_hashes = {
+    "e96046e8": {
+        "g1t": "90332493",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e8775294": {
         "g1t": "73fd8e67",
         "kidsobjdb": "CharacterEditor.kidssingletondb"

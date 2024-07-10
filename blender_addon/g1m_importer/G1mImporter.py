@@ -145,6 +145,22 @@ class G1Mmodel():
         json_path_md5 = dirr / "md5.json"
         json_path.write_text(json.dumps(res, indent=4))
         json_path_md5.write_text(json.dumps(md5s, indent=4))
+        #extract materials
+        mat_dir = dirr / "materials"
+        mat_dir.mkdir(parents=True, exist_ok=True)
+        for section in self.metadata.get("sections", []):
+            section_type = section.get("type", "")
+            if section_type == "MATERIALS":
+                for i, mat_info in enumerate(section.get("data", [])):
+                    mat_name = f"material_{self.g1m_hash}_{mat_info.get('id_referenceonly', i)}"
+                    mat_path = mat_dir / f"{mat_name}.json"
+                    mat_path.write_text(json.dumps(mat_info, indent=4))
+            elif section_type == "SHADER_PARAMS":
+                for i, shader_info in enumerate(section.get("data", [])):
+                    shader_name = f"shader_{self.g1m_hash}_{shader_info.get('id_referenceonly', i)}"
+                    shader_path = mat_dir / f"{shader_name}.json"
+                    shader_path.write_text(json.dumps(shader_info, indent=4))
+
         
     
     def collect_g1t_textures(self, dirr, dest_dir):
@@ -200,14 +216,8 @@ class G1Mmodel():
         return None
     
     def generate_materials(self, tex_dir, isemm=False, isnrm=True, isspm=True):
-        for section in self.metadata.get("sections", []):
-            if section.get("type", "") == "MATERIALS":
-                for i, mat_info in enumerate(section.get("data", [])):
-                    mat_name = f"{self.g1m_hash}_{mat_info.get('id_referenceonly', i)}"
-                    if bpy.data.materials.get(mat_name):
-                        bpy.data.materials.remove(bpy.data.materials[mat_name])
-                    mat = bpy.data.materials.new(mat_name)
         tex_dir = Path(tex_dir)
+        
         mesh_to_mat_index = {}
         for section in self.metadata.get("sections", []):
             if section.get("type", "") == "SUBMESH":
@@ -246,7 +256,33 @@ class G1Mmodel():
                     # print(index, str(m.alb))
                     # break
         for m in meshes:
-            m.generate_material()                
+            m.generate_material()     
+        
+        
+        for section in self.metadata.get("sections", []):
+            if section.get("type", "") == "MATERIALS":
+                for i, mat_info in enumerate(section.get("data", [])):
+                    mat_name = f"{self.g1m_hash}_{mat_info.get('id_referenceonly', i)}"
+                    prob_mat = bpy.data.materials.get(mat_name)
+                    if prob_mat:
+                        continue
+                    mat = bpy.data.materials.new(mat_name)
+                    if mat is None:
+                        continue
+                    mat.use_nodes = True
+                    bsdf = mat.node_tree.nodes["Principled BSDF"]
+                    for tex in tex_elem.get("textures", []):
+                        id = str(tex.get("id", -1))
+                        if id in self.g1ts:
+                            g1t = self.g1ts[id]
+                            if tex.get("type", -1) == 1 and tex.get("subtype", -1) == 1:
+                                dds = import_dds(tex_dir / g1t["dds_name"])
+                                if dds:
+                                    texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+                                    texImage.image = dds
+                                    mat.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
+                                    break
+                break
     
     def set_mesh_properties(self):
         for m in self.meshes:
@@ -395,7 +431,7 @@ class G1Mmodel():
     def save_ktid(self, dest_dir, tex_dir):
         print(f"Saving KTID to {dest_dir}")
         path = tex_dir / "ktid.json"
-        if not path.exists():
+        if not path.exists() or not tex_dir.exists():
             return
         ktid_dict = json.loads(path.read_text())
         res = {}

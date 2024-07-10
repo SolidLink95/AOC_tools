@@ -11,6 +11,45 @@ from copy import deepcopy
 from mathutils import Quaternion, Vector, Euler
 # from tkinter import filedialog
 
+
+def generate_textures_for_material(mat, alb=None, emm=None, nrm=None, spm=None):
+        mat.use_nodes = True
+        im_alb = import_dds(alb)
+        im_emm = import_dds(emm)
+        im_nrm = import_dds(nrm)
+        im_spm = import_dds(spm)
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        """Alb"""
+        if im_alb:
+            texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            # texImage.image = bpy.data.images.load(str(self.alb))
+            texImage.image = im_alb
+            mat.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
+        else:
+            return
+        """Emmision"""
+        if im_emm:
+            texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            # texImage.image = bpy.data.images.load(str(self.emm))
+            texImage.image = im_emm
+            mat.node_tree.links.new(bsdf.inputs['Emission'], texImage.outputs['Color'])
+            
+        """Normal"""
+        if im_nrm:
+            texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            # texImage.image = bpy.data.images.load(str(self.nrm))
+            texImage.image = im_nrm
+            mat.node_tree.links.new(bsdf.inputs['Normal'], texImage.outputs['Color'])
+        else:
+            normNode = mat.node_tree.nodes.new('ShaderNodeNormalMap')
+            mat.node_tree.links.new(bsdf.inputs['Normal'], normNode.outputs['Normal'])
+        """Specular"""
+        if im_spm:
+            texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            # texImage.image = bpy.data.images.load(str(self.spm))
+            texImage.image = im_spm
+            mat.node_tree.links.new(bsdf.inputs['Specular'], texImage.outputs['Color'])
+
 def duplicate_object(ob):
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='DESELECT')

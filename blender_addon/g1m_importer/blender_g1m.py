@@ -3513,36 +3513,26 @@ def update_directory_path(self, context,AocG1mExporter):
 
 def save_dump_path(self, context):
     if context.scene.Aoc_G1m_Exporter.directory_path:
-        save_aoc_files_path(context.scene.Aoc_G1m_Exporter.directory_path)
+        save_aoc_files_path(bpy.path.abspath(context.scene.Aoc_G1m_Exporter.directory_path).replace("\\", "/"))
 
 def get_material_indexes(self, context):
     scene = context.scene
     AocG1mExporter = scene.Aoc_G1m_Exporter
     arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-    if arm is not None:
-        try:
-            cur_ob = bpy.context.view_layer.objects.active
-            first_elem = (str(cur_ob["materialIndex"]), str(cur_ob["materialIndex"]), "")
-        except:
-            first_elem = ("0", "0", "")
-        res = [first_elem]
-        res += [(str(i), str(i), "") for i in range(int(arm["materials_count"])) if str(i) != first_elem[0]]
-        return res
-    return [("None", "No G1MS Found", "")]
+    try:
+        return [(str(i), str(i), "") for i in range(int(arm["materialIndex"]))]
+    except:
+        return [("None", "No G1MS Found", "")]
+  
 
 def get_shaderparam_indexes(self, context):
     scene = context.scene
     AocG1mExporter = scene.Aoc_G1m_Exporter
     arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-    if arm is not None:
-        try:
-            cur_ob = bpy.context.view_layer.objects.active
-            res = [(str(cur_ob["shaderParamIndex"]), str(cur_ob["shaderParamIndex"]), "")]
-        except:
-            res = [("0", "0", "")]
-        res += [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"])) if str(i) != res[0][0]]
-        return res
-    return [("None", "No G1MS Found", "")]
+    try:
+        return [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"]))]
+    except:
+        return [("None", "No G1MS Found", "")]
 
 
 class AocPath(PropertyGroup):

@@ -93,7 +93,8 @@ class G1Mmodel():
                                 return "alb"
                             if tex.get("type", -1) == 3 and tex.get("subtype", -1) == 8:
                                 return "nrm"
-                            # if tex.get("type", -1) == 66 and tex.get("subtype", -1) == 66:
+                            if tex.get("type", -1) == 66 and tex.get("subtype", -1) == 66:
+                                return "spm"
                             if tex.get("type", -1) == 37 and tex.get("subtype", -1) == 37:
                                 return "spm"
                             if tex.get("type", -1) == 19 and tex.get("subtype", -1) == 0:
@@ -237,21 +238,22 @@ class G1Mmodel():
                     tex_elem = section["data"][mat_index]
                     # for i, tex_elem in enumerate(section.get("data", [])):
                         # if tex_elem.get("id_referenceonly", -1) == mesh_ind:
-                        
                         # if tex_elem.get("id_referenceonly", -1) == index:
                     for tex in tex_elem.get("textures", []):
                         id = str(tex.get("id", -1))
                         if id in self.g1ts:
                             g1t = self.g1ts[id]
-                            if tex.get("type", -1) == 1 and tex.get("subtype", -1) == 1:
+                            ttype = tex.get("type", -1)
+                            subtype = tex.get("subtype", -1)
+                            if ttype == 1 and subtype == 1:
                                 m.alb = tex_dir / g1t["dds_name"]
-                            if tex.get("type", -1) == 3 and tex.get("subtype", -1) == 8:
+                            if ttype == 3 and subtype == 8:
                                 m.nrm = tex_dir / g1t["dds_name"]
-                            if tex.get("type", -1) == 37 and tex.get("subtype", -1) == 37:
+                            if ttype == 37 and subtype == 37:
                                 m.spm = tex_dir / g1t["dds_name"]
-                            if tex.get("type", -1) == 19 and tex.get("subtype", -1) == 0:
+                            if ttype == 19 and subtype == 0:
                                 m.emm = tex_dir / g1t["dds_name"]
-                            if tex.get("type", -1) == 5 and tex.get("subtype", -1) == 5:
+                            if ttype == 5 and subtype == 5:
                                 m.ao = tex_dir / g1t["dds_name"]
                     # print(index, str(m.alb))
                     # break

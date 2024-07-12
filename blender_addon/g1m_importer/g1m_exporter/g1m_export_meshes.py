@@ -944,7 +944,10 @@ def generate_vgmap(boneindex, model_mesh_metadata, skel_data):
     bonepalettes = [x for x in model_mesh_metadata['sections'] if x['type'] == "JOINT_PALETTES"][0]
     vgmap_json = {}
     for i in range(len(bonepalettes['data'][boneindex]['joints'])):
-        vgmap_json[skel_data['boneList'][bonepalettes['data'][boneindex]['joints'][i]['jointIndex']]['bone_id']] = i * 3
+        bonepalette_jointindex = bonepalettes['data'][boneindex]['joints'][i]['jointIndex']
+        vgmap_json[skel_data['boneList'][bonepalette_jointindex]['bone_id']] = i * 3
+    # for i, joint in enumerate(range(len(bonepalettes['data'][boneindex]['joints']))):
+    #     vgmap_json[skel_data['boneList'][joint['jointIndex']]['bone_id']] = i * 3
     return(vgmap_json)
 
 def generate_submesh(subindex, g1mg_stream, model_mesh_metadata, skel_data, fmts, e = '<', cull_vertices = True,\

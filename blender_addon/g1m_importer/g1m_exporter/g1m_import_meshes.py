@@ -543,6 +543,46 @@ def build_g1m(g1m_name):
         g1m.g1m_data = f.read()
         return build_g1m_from_binary(g1m)
     
+def get_skel_data_from_g1m(g1m):
+    # if os.path.exists(g1m_name) and (os.path.isdir(g1m_name)):
+    f = io.BytesIO(g1m.g1m_data)
+        # with open(g1m_name + '.g1m', "rb") as f:
+    print("Processing {0}...".format(g1m.g1m_hash))
+    file = {}
+    file["file_magic"], = struct.unpack(">I", f.read(4))
+    if file["file_magic"] == 0x5F4D3147:
+        e = '<' # Little Endian
+    elif file["file_magic"] == 0x47314D5F:
+        e = '>' # Big Endian
+    # else:
+    #     print("not G1M!") # Figure this out later
+    #     sys.exit()
+    # Pack G1MG and G1MF here, to insert into G1M. (Endianness is needed)
+    file["file_version"] = f.read(4).hex()
+    file["file_size"], = struct.unpack(e+"I", f.read(4))
+    chunks = {}
+    chunks["starting_offset"], chunks["reserved"], chunks["count"] = struct.unpack(e+"III", f.read(12))
+    # Grab the skeleton for the vgmap sanity check
+    f.seek(chunks["starting_offset"])
+    have_skeleton = False
+    model_skel_data = {}
+    for i in range(chunks["count"]):
+        chunk = {}
+        chunk["start_offset"] = f.tell()
+        chunk["magic"] = f.read(4).decode("utf-8")
+        chunk["version"] = f.read(4).hex()
+        chunk["size"], = struct.unpack(e+"I", f.read(4))
+        if chunk["magic"] in ['G1MS', 'SM1G'] and have_skeleton == False:
+            f.seek(chunk["start_offset"],0)
+            model_skel_data = parseG1MS(f.read(chunk["size"]),e)
+            if model_skel_data['jointCount'] > 1 and not model_skel_data['boneList'][0]['parentID'] < -200000000:
+                #Internal Skeleton
+                model_skel_data = calc_abs_skeleton(model_skel_data)
+            have_skeleton == True # I guess some games duplicate this section?
+        else:
+            f.seek(chunk["start_offset"] + chunk["size"],0) # Move to next section    
+    return model_skel_data
+            
 def build_g1m_from_binary(g1m):
     # if os.path.exists(g1m_name) and (os.path.isdir(g1m_name)):
     f = io.BytesIO(g1m.g1m_data)

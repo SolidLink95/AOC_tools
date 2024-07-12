@@ -38,7 +38,7 @@ from bpy.props import BoolProperty, StringProperty, CollectionProperty
 from bpy_extras.image_utils import load_image
 from g1m_importer.g1m_exporter.g1m_export_meshes import parseG1M, parseG1MFile
 from g1m_importer.g1m_exporter.g1m_to_basic_gltf import G1M2glTFBinary, gltfData
-from g1m_importer.g1m_exporter.g1m_import_meshes import build_g1m_from_binary 
+from g1m_importer.g1m_exporter.g1m_import_meshes import build_g1m_from_binary, get_skel_data_from_g1m
 from g1m_importer.KtidsKidsobs import ktid_dict_to_binary_file 
 # from g1m_importer.G1M_Exporter_plugin import exporter_classes_register,exporter_classes_unregister
 from mathutils import Matrix, Vector
@@ -1519,7 +1519,8 @@ def blender_vertex_to_3dmigoto_vertex(mesh, obj, blender_loop_vertex, layout, te
                 vertex[elem.name] = data
 
         if elem.name not in vertex:
-            print('NOTICE: Unhandled vertex element: %s' % elem.name)
+            pass
+            # print('NOTICE: Unhandled vertex element: %s' % elem.name)
         #else:
         #    print('%s: %s' % (elem.name, repr(vertex[elem.name])))
 
@@ -2619,25 +2620,22 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         #Process textures
         g1m.set_mesh_properties()
         tex_dir = root_dir / Path(f"{g1m_name}_textures")
+        tex_dir.mkdir(parents=True, exist_ok=True)
         if self.tex_from_dump:    
-            stdout_capture = io.StringIO()
-            stderr_capture = io.StringIO()
-            tmp_stdout = sys.stdout
-            tmp_stderr = sys.stderr
-            sys.stdout = stdout_capture
-            sys.stderr = stderr_capture
-            with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                g1m.get_g1t_data_from_dump(g1ts=g1ts)
-                tex_dir.mkdir(parents=True, exist_ok=True)
-                g1m.extract_g1t_textures(tex_dir)
-                g1m.generate_materials(tex_dir, isemm=(not self.skip_emm), isnrm=(not self.skip_nrm), isspm=(not self.skip_spm))
-            sys.stdout = tmp_stdout
-            sys.stderr = tmp_stderr
+            g1m.get_g1t_data_from_dump(g1ts=g1ts)
+            tex_dir.mkdir(parents=True, exist_ok=True)
+            g1m.extract_g1t_textures(tex_dir)
+            g1m.generate_materials(tex_dir, isemm=(not self.skip_emm), isnrm=(not self.skip_nrm), isspm=(not self.skip_spm))
+        skel_data = get_skel_data_from_g1m(g1m)
+        (tex_dir / f"metadata_{g1m_name}.json").write_text(json.dumps(g1m.metadata, indent=4))
+        (tex_dir / f"skeleton_{g1m_name}.json").write_text(json.dumps(skel_data, indent=4))
+                                                           
         print("armature: ", g1m.arm)
         print("Meshes: ", [e.name for e in g1m.meshes])
         # for ob in g1m.meshes:
         #     ob.parent = g1m.arm
         
+        g1m.arm["skeleton"] = json.dumps(skel_data)
         g1m.arm["g1m_backup"] = g1m.g1m_data
         g1m.arm["renamed_bones"] = self.rename_bones
         g1m.arm["ktid_dict"] = g1m.ktid_dict
@@ -2652,24 +2650,7 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         
         self.report({'INFO'}, f'Imported G1M file {g1m_name}')
         return {'FINISHED'}
-        for filename in path.glob("*"):
-            try:
-                (vb_path, ib_path, fmt_path, vgmap_path) = self.get_vb_ib_paths(os.path.join(dirname, filename.name))
-                # (vb_path, ib_path, fmt_path, vgmap_path) = self.get_vb_ib_paths(str(p))
-                vb_path_norm = set(map(os.path.normcase, vb_path))
-                if vb_path_norm.intersection(done) != set():
-                    continue
-                done.update(vb_path_norm)
-
-                if fmt_path is not None:
-                    import_3dmigoto_raw_buffers(self, context, fmt_path, fmt_path, vb_path=vb_path, ib_path=ib_path, vgmap_path=vgmap_path, **migoto_raw_import_options)
-                else:
-                    migoto_raw_import_options['vb_path'] = vb_path
-                    migoto_raw_import_options['ib_path'] = ib_path
-                    bpy.ops.import_mesh.migoto_input_format('INVOKE_DEFAULT')
-            except Fatal as e:
-                self.report({'ERROR'}, str(e))
-        return {'FINISHED'}
+        
 
 @orientation_helper(axis_forward='-Z', axis_up='Y')
 class Import3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHelper):
@@ -3367,6 +3348,7 @@ class OBJECT_OT_G1M_Export(Operator):
             return {'CANCELLED'}
         if AocG1mExporter.is_g1m_export:
             prepare_for_export(arm, g1m)
+            update_vgs_for_meshes(arm)
         
         if AocG1mExporter.only_selected_objects:
             meshes = [o for o in bpy.data.objects if o in context.selected_objects and o.parent==arm]
@@ -3383,6 +3365,7 @@ class OBJECT_OT_G1M_Export(Operator):
         
         temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
         if AocG1mExporter.is_g1m_export:
+            # (dest_dir / f"metadata_{g1m.g1m_hash}.json").write_text(json.dumps(g1m.metadata, indent=4))
             g1m.update_metadata_from_scene()
             # g1m.prepare_meshes_for_export(vgmaps)
             g1m.temp_path = temp_path
@@ -3449,6 +3432,7 @@ class OBJECT_PT_AocExportPanel(Panel):
         scene = context.scene
         AocG1mExporter = scene.Aoc_G1m_Exporter
         layout.label(text="AOC G1M Export")
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
         try:
             cur_ob = bpy.context.view_layer.objects.active
             layout.separator() 
@@ -3474,7 +3458,9 @@ class OBJECT_PT_AocExportPanel(Panel):
                 lv0 = len(obs2.vertex_groups)
                 # obs1 = s_obs[1]
                 lv1 = len(obs1.vertex_groups)
-                mismatched = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
+                bones = [bone.name for bone in arm.pose.bones]
+                # mismatched = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
+                mismatched = [vg for vg in obs2.vertex_groups if vg.name not in bones]
                 m = "MISMATCHED" if mismatched else "CORRECT"
                 t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1} - {m}"
                 layout.label(text=t)

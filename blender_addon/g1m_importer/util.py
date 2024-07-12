@@ -12,21 +12,110 @@ from mathutils import Quaternion, Vector, Euler
 # from tkinter import filedialog
 
 
+def update_vgs_for_meshes(arm):
+    #call after renaming bones to AOC bones
+    print(arm, "metadata" in arm)
+    metadata = json.loads(arm["metadata"])
+    print(metadata.keys())
+    skel_data = json.loads(arm["skeleton"])
+    meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
+    for mesh in meshes:
+        update_vgs_for_mesh(mesh, metadata, skel_data)
+    arm["metadata"] = json.dumps(metadata)
+    
+def get_section(metadata, ttype):
+    for i, section in enumerate(metadata['sections']):
+        if section['type'] == ttype:
+            return i, section
+    raise ValueError(f"Section {ttype} not found in metadata!")
+
+
+def update_vgs_for_mesh(mesh,  metadata, skel_data):
+    #call after renaming bones to AOC bones
+    try:
+        ind = int(mesh.name.split(".")[0]) if "." in mesh.name else int(mesh.name)
+    except:
+        print(f"transformed or drivermesh, skip it: {mesh.name}")
+        return # transformed or drivermesh, skip it
+    bnp_index, bonepalettes = get_section(metadata, "JOINT_PALETTES")
+    sbm_index, submeshes = get_section(metadata, "SUBMESH")
+    submesh_data = submeshes["data"][ind]
+    bone_palette = bonepalettes["data"][submesh_data["bonePaletteIndex"]]
+    bone_palette_id = bone_palette["block_id_referenceonly"]
+    vgmap = dict(mesh["3DMigoto:VGMap:"])
+    mis_vgs = [vg for vg in mesh.vertex_groups if vg.name not in vgmap.keys()]
+    if not mis_vgs:
+        return # mesh is correct
+    for vg in mis_vgs:
+        bone_id = vg.name.split("_")[-1] if "_" in vg.name else vg.name
+        try:
+            bone_id_int = int(bone_id)
+        except:
+            print(f"ERROR: Bone {bone_id} Cannot be converted to int!")
+            raise ValueError("")
+        bone_data = next((e for e in skel_data["boneList"] if e["bone_id"] == vg.name), None)
+        if not bone_data:
+            print(f"ERROR: Bone {vg.name} not found in skeleton data!")
+            raise ValueError("")
+        bone_n = next((k for k, v in skel_data["boneToBoneID"].items() if v==bone_id_int), None)
+        if not bone_n:
+            print(f"ERROR: Bone {bone_id} not found in boneToBoneID dict!")
+            raise ValueError("")
+        new_joint = find_joint_palette_for_bone(metadata, int(bone_n))
+        if not new_joint:
+            print(f"ERROR: Bone {bone_n} not found in any joint palettes!")
+            raise ValueError("")
+        new_joint["id_referenceonly"] = int(bone_palette["joint_count"])
+        bone_palette["joint_count"] += 1
+        bone_palette["joints"].append(new_joint)
+        print(f"INFO: Added {vg.name} to joint palette for mesh {mesh.name}")
+        print(new_joint)
+        metadata['sections'][bnp_index]["data"][submesh_data["bonePaletteIndex"]] = bone_palette
+        for i in range(len(bone_palette['joints'])):
+            if bone_palette["joints"][i]["id_referenceonly"] == new_joint["id_referenceonly"]:
+                vgmap[vg.name] = i * 3
+                print(f"INFO: Added {vg.name} to VGMap for mesh {mesh.name}")
+                break
+        mesh["3DMigoto:VGMap:"] = vgmap
+    return metadata
+        
+
+def find_joint_palette_for_bone(metadata, bone_n):
+    
+    bnp_index, bonepalettes = get_section(metadata, "JOINT_PALETTES")
+    for bonepalette in bonepalettes["data"]:
+        for joint in bonepalette["joints"]:
+            if joint["jointIndex"] == bone_n:
+                return deepcopy(joint)
+    return None
+        
+
+        
+        
+        
+        
+    
+
+    
+    
+    # arm["metadata"] = json.dumps(metadata)
+
+
 def generate_textures_for_material(mat, alb=None, emm=None, nrm=None, spm=None):
-        mat.use_nodes = True
         im_alb = import_dds(alb)
         im_emm = import_dds(emm)
         im_nrm = import_dds(nrm)
         im_spm = import_dds(spm)
-        bsdf = mat.node_tree.nodes["Principled BSDF"]
         """Alb"""
         if im_alb:
+            mat.use_nodes = True
+            bsdf = mat.node_tree.nodes["Principled BSDF"]
             texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
             # texImage.image = bpy.data.images.load(str(self.alb))
             texImage.image = im_alb
             mat.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
         else:
-            return
+            return 
         """Emmision"""
         if im_emm:
             texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')

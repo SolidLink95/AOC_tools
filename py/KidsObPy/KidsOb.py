@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import sys
 import struct
 import io
@@ -83,6 +84,15 @@ class KidsOb:
     def to_dict(self):
         return {obj.name: {col.name: col.vals for col in obj.columns} for obj in self.objects}
     
+    def to_json(self):
+        return {
+            "header": self.hdr.to_dict(),
+            "objects": [obj.to_dict() for obj in self.objects]
+        }
+    
+    def to_json_file(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.to_json(), f, indent=4)
     
         
             
@@ -94,6 +104,14 @@ class KidsODBColumn:
         self.vals = []
         self.row_num = 0
     
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "type": u32_to_hex(self.type),
+            "vals": self.vals,
+            "row_num": self.row_num
+        }
+    
 
 class KODHeader():
     def __init__(self) -> None:
@@ -104,6 +122,17 @@ class KODHeader():
         self.num_entries = 0
         self.name_file = 0
         self.file_size = 0
+    
+    def to_dict(self):
+        return {
+            "signature": u32_to_hex(self.signature),
+            "version": u32_to_hex(self.version),
+            "header_size": u32_to_hex(self.header_size),
+            "platform": u32_to_hex(self.platform),
+            "num_entries": u32_to_hex(self.num_entries),
+            "name_file": u32_to_hex(self.name_file),
+            "file_size": u32_to_hex(self.file_size)
+        }
 
 class KODIHeader():
     def __init__(self) -> None:
@@ -113,6 +142,16 @@ class KODIHeader():
         self.name = 0
         self.type = 0
         self.num_columns = 0
+        
+    def to_dict(self):
+        return {
+            "signature": u32_to_hex(self.signature),
+            "version": u32_to_hex(self.version),
+            "entry_size": u32_to_hex(self.entry_size),
+            "name": u32_to_hex(self.name),
+            "type": u32_to_hex(self.type),
+            "num_columns": u32_to_hex(self.num_columns)
+        }
         
 class KODRHeader():
     def __init__(self) -> None:
@@ -134,6 +173,17 @@ class KidsODBObject():
         self.is_r = False
         self.columns = []
         
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "type": u32_to_hex(self.type),
+            "version": u32_to_hex(self.version),
+            "parent_object_file": u32_to_hex(self.parent_object_file),
+            "parent_object": u32_to_hex(self.parent_object),
+            "is_r": self.is_r,
+            "columns": [col.to_dict() for col in self.columns]
+        }
+        
 def trim_json_str(s):
     return s.replace("[\n", "[").replace("\n        ]", "]").replace("[            ", "[")
 
@@ -147,14 +197,10 @@ def reformat_json_string(json_string):
     return compact_json
 
 if __name__=="__main__":
-    path = r"W:\coding\AOC_tools\tmp\CharacterEditor.kidsobjdb"
+    mainpath = Path(os.path.dirname(os.path.abspath(__file__)))
+    path = mainpath / "CharacterEditor.kidssingletondb"
     with open(path, 'rb') as f:
         data = f.read()
     kidsob = KidsOb()
     kidsob.from_binary(data)
-    res = kidsob.to_dict()
-    # json_str = json.dumps(res, indent=4)
-    json_str = json.dumps(res, separators=(',', ': '), indent=4)
-    with open("tmp.json", 'w') as f:
-        f.write(trim_json_str(json_str))
-    # print(json.dumps(res, indent=4))
+    kidsob.to_json_file(mainpath / "CharacterEditor.json")

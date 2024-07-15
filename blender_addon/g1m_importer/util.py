@@ -61,6 +61,8 @@ def update_vgs_for_mesh(mesh,  metadata, skel_data):
         if not bone_n:
             print(f"ERROR: Bone {bone_id} not found in boneToBoneID dict!")
             raise ValueError("")
+        if is_bone_in_bonepalette(metadata, submesh_data["bonePaletteIndex"], int(bone_n)):
+            continue
         new_joint = find_joint_palette_for_bone(metadata, int(bone_n))
         if not new_joint:
             print(f"ERROR: Bone {bone_n} not found in any joint palettes!")
@@ -80,6 +82,15 @@ def update_vgs_for_mesh(mesh,  metadata, skel_data):
     return metadata
         
 
+def is_bone_in_bonepalette(metadata, bonepalette_index, bone_n):
+    
+    bnp_index, bonepalettes = get_section(metadata, "JOINT_PALETTES")
+    for joint in bonepalettes["data"][bonepalette_index]["joints"]:
+        if joint["jointIndex"] == bone_n:
+            return True
+    return False
+    
+    
 def find_joint_palette_for_bone(metadata, bone_n):
     
     bnp_index, bonepalettes = get_section(metadata, "JOINT_PALETTES")
@@ -182,6 +193,20 @@ def duplicate_g1m_object(arm, ob):
 
     arm["metadata"] = json.dumps(metadata)
 
+
+def update_meshes_from_metadata(meshes, metadata):
+    for mesh in meshes:
+        try:
+            ind = int(mesh.name.split(".")[0]) if "." in mesh.name else int(mesh.name)
+        except:
+            print(f"transformed or drivermesh, skip it: {mesh.name}")
+            continue
+        for section in metadata.get("sections", []):
+            ttype = section.get("type", "")
+            if ttype == "SUBMESH":
+                submesh_data = section["data"][ind]
+                mesh["materialIndex"] = int(submesh_data["materialIndex"])
+                mesh["shaderParamIndex"] = int(submesh_data["shaderParamIndex"])
 
 
 def update_materials_after_index_update(arm):

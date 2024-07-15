@@ -108,7 +108,7 @@ if __name__ == "__main__":
     yuzu_mods = Path(r"W:\AOC_modding\_MODS")
     #aoc.swap_model("cd4ed2ed", "26a3f1f2", yuzu_mods / "Swap_gerudovai_to_royalguard")
     #aoc.swap_model("e2211005", "26a3f1f2", yuzu_mods / "Swap_gerudovai_to_royalguard")
-    aoc.swap_model("d2552da3", "c70815e6", yuzu_mods / "Swap_gerudovai_to_royalguard")
+    aoc.swap_model("c63f1322", "7e52fec7", yuzu_mods / "tree_branch_test")
     #aoc.swap_model("b4736804", "b5e9b96d", yuzu_mods / "Archaic_set_over_Snowquill")
     #aoc.swap_model("cd4ed2ed", "b5e9b96d", yuzu_mods / "Archaic_set_over_Snowquill")
     #aoc.swap_model("b4736804", "bd554845", yuzu_mods / "Archaic_set_over_Snowquill")

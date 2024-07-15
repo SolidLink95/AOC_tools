@@ -98,6 +98,7 @@ class G1T():
         dds = [bytes(e) for e in self.dds]
         rawdata = g1t_module.G1tCompile(dds, json.dumps(self.metadata))
         if len(rawdata) == 0:
+            print(f"ERROR: Failed to compile G1T data: {self.Hash}")
             raise ValueError("Failed to compile G1T data")
         return bytes(rawdata)
     

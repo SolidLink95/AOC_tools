@@ -3313,6 +3313,40 @@ class G1M_duplicate_mesh(bpy.types.Operator):
 
         self.report({'INFO'}, "Preparing to duplicate mesh")
         return self.execute(context)
+    
+class G1M_update_from_json_metadata(bpy.types.Operator):
+    """Reload All Images from Disk"""
+    bl_idname = "object.update_g1m_metadata"
+    bl_label = "Update currently selected g1m model metadata"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        if not arm or "metadata" not in arm:
+            return {'CANCELLED'}
+        # metadata = json.loads(arm["metadata"])
+        json_path = Path(arm["tex_dir"]) / f"metadata_{arm.name}.json"
+        if not json_path.exists():
+            self.report({'ERROR'}, f"Metadata file not found: {json_path}")
+            return {'CANCELLED'}
+        metadata = json.loads(json_path.read_text())
+        meshes = [o for o in bpy.data.objects if o.parent==arm and o.type=="MESH"]
+        update_meshes_from_metadata(meshes,metadata)
+        _, materials = get_section(metadata, "MATERIALS")
+        _, shaderparams = get_section(metadata, "SHADER_PARAMS")
+        arm["materials_count"] = int(materials["count"])
+        arm["shaderParams_count"] = int(shaderparams["count"])
+                
+        arm["metadata"] = json.dumps(metadata)
+        self.report({'INFO'}, f"Updated metadata for {arm.name}")
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to duplicate mesh")
+        return self.execute(context)
 
 class OBJECT_OT_G1M_Export(Operator):
     bl_idname = "object.export_g1m"
@@ -3459,13 +3493,16 @@ class OBJECT_PT_AocExportPanel(Panel):
                 # obs1 = s_obs[1]
                 lv1 = len(obs1.vertex_groups)
                 bones = [bone.name for bone in arm.pose.bones]
-                # mismatched = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
-                mismatched = [vg for vg in obs2.vertex_groups if vg.name not in bones]
-                m = "MISMATCHED" if mismatched else "CORRECT"
-                t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1} - {m}"
+                mismatched_strict = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
+                mismatched_bones = [vg for vg in obs2.vertex_groups if vg.name not in bones]
+                m_strict = "MISMATCHED" if mismatched_strict else "CORRECT"
+                m_bones = "MISMATCHED" if mismatched_bones else "CORRECT"
+                t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1}"
                 layout.label(text=t)
-                if mismatched:
-                    layout.label(text=", ".join([vg.name for vg in mismatched]))
+                if mismatched_strict or mismatched_bones:
+                    layout.label(text=", ".join([vg.name for vg in mismatched_strict]))
+                    layout.label(text=", ".join([vg.name for vg in mismatched_bones]))
+                    layout.label(text=f"Strict: {m_strict} - Bones: {m_bones}")
         except:
             pass
 
@@ -3477,6 +3514,8 @@ class OBJECT_PT_AocExportPanel(Panel):
         layout.prop(AocG1mExporter, "g1ms_list", text="G1Ms")
         
         layout.operator("image.reload_all", text="Reload All Images")
+        if arm is not None:
+            layout.operator("object.update_g1m_metadata", text="Update metadata from json")
         # update_directory_path(self, context, AocG1mExporter)
         # Check if there is at least one armature
         arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
@@ -3506,7 +3545,7 @@ def get_material_indexes(self, context):
     AocG1mExporter = scene.Aoc_G1m_Exporter
     arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
     try:
-        return [(str(i), str(i), "") for i in range(int(arm["materialIndex"]))]
+        return [(str(i), str(i), "") for i in range(int(arm["materials_count"]))]
     except:
         return [("None", "No G1MS Found", "")]
   
@@ -3582,6 +3621,7 @@ exporter_classes = [
     OBJECT_OT_SelectDirectory,
     OBJECT_OT_G1M_Export,
     OBJECT_PT_AocExportPanel,
+    G1M_update_from_json_metadata
 ]
 
 register_classes = (

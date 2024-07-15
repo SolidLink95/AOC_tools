@@ -58,7 +58,8 @@ class G1Mmodel():
                 if g1t_path:
                     # print(f"Found G1T file: {g1t_hash}")
                     g1t = G1T(g1t_path)
-                    self.g1ts[str(ind)] = {"g1t": g1t, "dds_name": f""}
+                    # self.g1ts[str(ind)] = {"g1t": g1t, "dds_name": f""}
+                    self.g1ts[str(ind)] = {"g1t": g1t, "dds_names": []}
                 else:
                     print(f"G1T file not found: {g1t_hash}")
             else:
@@ -107,22 +108,51 @@ class G1Mmodel():
         tex_dir = Path(tex_dir)
         dest_dir = Path(dest_dir)
         json_md5 = json.loads((tex_dir / "md5.json").read_text())
-        for dds_file in tex_dir.glob("*dds"):
-            dds_data = dds_file.read_bytes()
-            md5 = md5_bytes(dds_data)
-            if md5 != json_md5.get(dds_file.name, ""):
-                ttype, ind, g1t_hash, ktid_ind = dds_file.stem.split("_")
-                g1t_path = self.find_g1t(g1t_hash)
-                if g1t_path is None:
-                    print("G1T file not found: ", g1t_hash)
-                else:
+        g1ts = []
+        dds_files = list(tex_dir.glob("*dds"))
+        g1t_hashes = [e.stem.split("_")[2] for e in dds_files if "_" in e.stem and e.stem.count("_") == 3]
+        try:
+            g1t_data = json.loads((tex_dir / "g1t.json").read_text())
+        except:
+            g1t_data = None
+        # for dds_file in tex_dir.glob("*dds"):
+        for g1t_hash in list(set(g1t_hashes)):
+            g1t_dds_files = [e for e in dds_files if g1t_hash in e.stem]
+            g1t_path = self.find_g1t(g1t_hash)
+            if g1t_path is None:
+                print("G1T file not found: ", g1t_hash)
+                continue
+            print(f"Processing G1T: {g1t_hash}, dds files: ",[e.name for e in g1t_dds_files])
+            g1t = G1T(g1t_path)
+            if g1t_data is not None and g1t_hash in g1t_data:
+                g1t.metadata = g1t_data[g1t_hash]
+                print(f"Found metadata for G1T: {g1t_hash}")
+            while len(g1t.dds) < len(g1t_dds_files):
+                g1t.dds.append(b"")
+            # if len(g1t_dds_files) > len(g1t.dds):
+            #     for _ in range(len(g1t_dds_files) - len(g1t.dds)):
+            #         g1t.dds.append(b"")
+            is_saved = False
+            for dds_file in g1t_dds_files:
+                dds_data = dds_file.read_bytes()
+                md5 = md5_bytes(dds_data)
+                if md5 != json_md5.get(dds_file.name, ""): #save only changed textures or new ones
+                    is_saved = True
+                    ttype, ind, g1t_hash, ktid_ind = dds_file.stem.split("_")
                     try:
-                        g1t = G1T(g1t_path)
                         g1t.dds[int(ind)] = dds_data
-                        dest_dir.mkdir(parents=True, exist_ok=True)
-                        g1t.save_file(dest_dir / f"{g1t_hash}.g1t")
                     except:
-                        print(f"Error processing: {dds_file.name}")
+                        print(f"Error processing: {dds_file.name} - {ind}")
+            if is_saved:
+                g1ts.append(g1t)
+        if g1ts:
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            for g1t in g1ts:
+                try:
+                    g1t.save_file(dest_dir / f"{g1t.Hash}.g1t")
+                    print(f"Saved G1T: {g1t.Hash}")
+                except Exception as e:
+                    print(f"Error saving G1T: {g1t.Hash}, skipping - {e}")
                     
         
             
@@ -137,7 +167,8 @@ class G1Mmodel():
             for i, rawdata in enumerate(g1t.dds):
                 pref = self.tex_ktid_index_to_str_name(ind)
                 file_name = f"{pref}_{i}_{g1t.Hash}_{ind}.dds"
-                self.g1ts[ind]["dds_name"] = file_name
+                # self.g1ts[ind]["dds_name"] = file_name
+                self.g1ts[ind]["dds_names"].append(file_name)
                 dest_path = dirr / file_name
                 dest_path.write_bytes(rawdata)
                 res[str(g1t.Hash)] = g1t.metadata
@@ -245,16 +276,18 @@ class G1Mmodel():
                             g1t = self.g1ts[id]
                             ttype = tex.get("type", -1)
                             subtype = tex.get("subtype", -1)
+                            layer = 0
+                            pot_tex = tex_dir / g1t["dds_names"][layer]
                             if ttype == 1 and subtype == 1:
-                                m.alb = tex_dir / g1t["dds_name"]
+                                m.alb = pot_tex
                             if ttype == 3 and subtype == 8:
-                                m.nrm = tex_dir / g1t["dds_name"]
-                            if ttype == 37 and subtype == 37:
-                                m.spm = tex_dir / g1t["dds_name"]
+                                m.nrm = pot_tex
+                            if (ttype == 37 and subtype) == 37 or (ttype == 66 and subtype == 66):
+                                m.spm = pot_tex
                             if ttype == 19 and subtype == 0:
-                                m.emm = tex_dir / g1t["dds_name"]
+                                m.emm = pot_tex
                             if ttype == 5 and subtype == 5:
-                                m.ao = tex_dir / g1t["dds_name"]
+                                m.ao = pot_tex
                     # print(index, str(m.alb))
                     # break
         for m in meshes:
@@ -275,10 +308,11 @@ class G1Mmodel():
                     bsdf = mat.node_tree.nodes["Principled BSDF"]
                     for tex in tex_elem.get("textures", []):
                         id = str(tex.get("id", -1))
+                        layer = 0
                         if id in self.g1ts:
                             g1t = self.g1ts[id]
                             if tex.get("type", -1) == 1 and tex.get("subtype", -1) == 1:
-                                dds = import_dds(tex_dir / g1t["dds_name"])
+                                dds = import_dds(tex_dir / g1t["dds_names"][layer])
                                 if dds:
                                     texImage = mat.node_tree.nodes.new('ShaderNodeTexImage')
                                     texImage.image = dds
@@ -456,7 +490,7 @@ class G1Mmodel():
         for ind, ktid_hash in self.ktid_dict.items():
             res[ind] = {}
             for _, g1t in self.g1ts.items():
-                _, _, g1t_hash, ktid_ind = g1t["dds_name"][:-4].split("_")
+                _, _, g1t_hash, ktid_ind = g1t["dds_names"][0][:-4].split("_")
                 if ktid_ind == ind:
                     print(f"KTID ind: {ind} hash {ktid_hash} G1T hash: {g1t_hash}")
                     res[ind] = g1t_hash

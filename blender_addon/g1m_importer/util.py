@@ -161,13 +161,14 @@ def duplicate_object(ob):
 
 def duplicate_g1m_object(arm, ob):
     meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
-    new_ind = len(meshes)
+    metadata = json.loads(arm["metadata"])
+    subm_ind, submeshes = get_section(metadata, "SUBMESH")
+    new_ind = int(submeshes["count"])
     new_name = f"{new_ind}.vb"
     g1m_hash = arm.name
     index = ob.name.split(".")[0] if "." in ob.name else ob.name
     index = int(index)
 
-    metadata = json.loads(arm["metadata"])
     new_ob = duplicate_object(ob)
     # new_ob = ob.copy()
     # new_ob.data = ob.data.copy()
@@ -188,8 +189,13 @@ def duplicate_g1m_object(arm, ob):
                     if index in lod["indices"]:
                         metadata["sections"][s]["data"][i]["lod"][k]["indices"].append(new_ind)
                         metadata["sections"][s]["data"][i]["lod"][k]["indexCount"] += 1
+                        break
 
-
+    
+    tex_dir = Path(arm["tex_dir"])
+    json_path = tex_dir / f"metadata_{arm.name}.json"
+    if  tex_dir.exists() and json_path.exists():
+        json_path.write_text(json.dumps(metadata, indent=4))
 
     arm["metadata"] = json.dumps(metadata)
 
@@ -207,6 +213,12 @@ def update_meshes_from_metadata(meshes, metadata):
                 submesh_data = section["data"][ind]
                 mesh["materialIndex"] = int(submesh_data["materialIndex"])
                 mesh["shaderParamIndex"] = int(submesh_data["shaderParamIndex"])
+                mesh["bonePaletteIndex"] = int(submesh_data["bonePaletteIndex"])
+        new_mat_name = f"{mesh.parent.name}_{mesh['materialIndex']}"
+        new_mat = bpy.data.materials.get(new_mat_name)
+        if new_mat and mesh.material_slots:
+            mesh.material_slots[0].material = new_mat
+            
 
 
 def update_materials_after_index_update(arm):
@@ -222,8 +234,10 @@ def update_materials_after_index_update(arm):
         for section in metadata.get("sections", []):
             ttype = section.get("type", "")
             if ttype == "SUBMESH":
+                section["count"] = len(section["data"])
                 section["data"][index]["materialIndex"] = int(m["materialIndex"])
                 section["data"][index]["shaderParamIndex"] = int(m["shaderParamIndex"])
+                section["data"][index]["bonePaletteIndex"] = int(m["bonePaletteIndex"])
         if m.material_slots:
             mat_name = f"{g1m_hash}_{m['materialIndex']}"
             mat = bpy.data.materials.get(mat_name)
@@ -379,7 +393,14 @@ def get_aoc_files_path():
     # json_path.write_text(json.dumps(res, indent=4))
     return None
 
-
+def update_json_file_metadata_from_scene(arm):
+    tex_dir = Path(arm["tex_dir"])
+    json_path = tex_dir / f"metadata_{arm.name}.json"
+    if not tex_dir.exists() or not json_path.exists():
+        return #nothing to update
+    metadata = json.loads(arm["metadata"])
+    json_path.write_text(json.dumps(metadata, indent=4))
+    
 
 def is_name_duplicate(name):
     size = len(name)

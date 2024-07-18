@@ -2612,10 +2612,12 @@ class ImportG1M3DMigotoRaw(bpy.types.Operator, ImportHelper, IOOBJOrientationHel
         gltf = G1M2glTFBinary(g1m.g1m_data, g1m_name, overwrite=True)
         gltf_path = gltf.write_to_path(path)
         g1m.arm = import_armature_from_gltf(gltf_path)
+        rotate_arm = False
         if g1m.arm is None:
             g1m.parse_skeleton()
+            rotate_arm = True
         g1m.arm.name = g1m_name #armature created
-        g1m.process_objects(rename_bones_flag=self.rename_bones)
+        g1m.process_objects(rename_bones_flag=self.rename_bones, rotate_arm=rotate_arm)
         remove_dir_if_exists(path)
         #Process textures
         g1m.set_mesh_properties()
@@ -3250,7 +3252,9 @@ class OBJECT_OT_UpdateMeshesIndexes(Operator):
             if arm is not None and cur_ob.parent == arm:
                 cur_ob["materialIndex"] = AocG1mExporter.material_index
                 cur_ob["shaderParamIndex"] = AocG1mExporter.shaderparam_index
+                cur_ob["bonePaletteIndex"] = AocG1mExporter.bonepalette_index
                 update_materials_after_index_update(arm)
+                update_json_file_metadata_from_scene(arm)
                 
                 self.report({'INFO'}, f"Updated indexes for {cur_ob.name}")
         except Exception as e:
@@ -3336,8 +3340,10 @@ class G1M_update_from_json_metadata(bpy.types.Operator):
         update_meshes_from_metadata(meshes,metadata)
         _, materials = get_section(metadata, "MATERIALS")
         _, shaderparams = get_section(metadata, "SHADER_PARAMS")
+        _, bonepalettes = get_section(metadata, "JOINT_PALETTES")
         arm["materials_count"] = int(materials["count"])
         arm["shaderParams_count"] = int(shaderparams["count"])
+        arm["bonePalette_count"] = int(bonepalettes["count"])
                 
         arm["metadata"] = json.dumps(metadata)
         self.report({'INFO'}, f"Updated metadata for {arm.name}")
@@ -3471,13 +3477,15 @@ class OBJECT_PT_AocExportPanel(Panel):
             cur_ob = bpy.context.view_layer.objects.active
             layout.separator() 
             layout.label(text=f"Selected object: {cur_ob.name}")
-            row = layout.row()
-            row.label(text=f"materialIndex: {cur_ob['materialIndex']}")
-            row.label(text=f"shaderParamIndex: {cur_ob['shaderParamIndex']}")
             layout.label(text=f"Indexes")
             row = layout.row()
-            row.prop(AocG1mExporter, "material_index", text="Material")
-            row.prop(AocG1mExporter, "shaderparam_index", text="ShaderParam")
+            row.label(text=f"Material: {cur_ob['materialIndex']}")
+            row.label(text=f"ShaderParam: {cur_ob['shaderParamIndex']}")
+            row.label(text=f"BonePalette: {cur_ob['bonePaletteIndex']}")
+            # row = layout.row()
+            layout.prop(AocG1mExporter, "material_index", text="Material")
+            layout.prop(AocG1mExporter, "shaderparam_index", text="ShaderParam")
+            layout.prop(AocG1mExporter, "bonepalette_index", text="BonePalette")
             layout.operator("object.update_meshes_indexes", text="Update Indexes")
             layout.operator("object.duplicate_g1m_mesh", text="Duplicate mesh")
             layout.separator() 
@@ -3499,10 +3507,10 @@ class OBJECT_PT_AocExportPanel(Panel):
                 m_bones = "MISMATCHED" if mismatched_bones else "CORRECT"
                 t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1}"
                 layout.label(text=t)
-                if mismatched_strict or mismatched_bones:
-                    layout.label(text=", ".join([vg.name for vg in mismatched_strict]))
-                    layout.label(text=", ".join([vg.name for vg in mismatched_bones]))
-                    layout.label(text=f"Strict: {m_strict} - Bones: {m_bones}")
+                # if mismatched_strict or mismatched_bones:
+                if mismatched_strict: layout.label(text="strict: " + ", ".join([vg.name for vg in mismatched_strict]))
+                if mismatched_bones: layout.label(text="bones: " + ", ".join([vg.name for vg in mismatched_bones]))
+                layout.label(text=f"Strict: {m_strict} - Bones: {m_bones}")
         except:
             pass
 
@@ -3558,6 +3566,15 @@ def get_shaderparam_indexes(self, context):
         return [(str(i), str(i), "") for i in range(int(arm["shaderParams_count"]))]
     except:
         return [("None", "No G1MS Found", "")]
+    
+def get_bonepalette_indexes(self, context):
+    scene = context.scene
+    AocG1mExporter = scene.Aoc_G1m_Exporter
+    arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+    try:
+        return [(str(i), str(i), "") for i in range(int(arm["jointPalettes_count"]))]
+    except:
+        return [("None", "No G1MS Found", "")]
 
 
 class AocPath(PropertyGroup):
@@ -3590,6 +3607,11 @@ class AocPath(PropertyGroup):
         name="ShaderParam Index",
         description="ShaderParam index of g1m mesh",
         items=get_shaderparam_indexes
+    )
+    bonepalette_index: EnumProperty(
+        name="ShaderParam Index",
+        description="ShaderParam index of g1m mesh",
+        items=get_bonepalette_indexes
     )
     only_selected_objects: BoolProperty(
         name="Only Selected Objects",

@@ -1,3 +1,4 @@
+import math
 import os
 import subprocess
 import sys
@@ -332,10 +333,13 @@ class G1Mmodel():
                 if ttype == "SUBMESH":
                     m["materialIndex"] = section["data"][index]["materialIndex"]
                     m["shaderParamIndex"] = section["data"][index]["shaderParamIndex"]
+                    m["bonePaletteIndex"] = section["data"][index]["bonePaletteIndex"]
                 elif ttype == "MATERIALS":
                     self.arm["materials_count"] = str(section.get("count", len(section.get("data", []))))
                 elif ttype == "SHADER_PARAMS":
                     self.arm["shaderParams_count"] = str(section.get("count", len(section.get("data", []))))
+                elif ttype == "JOINT_PALETTES":
+                    self.arm["jointPalettes_count"] = str(section.get("count", len(section.get("data", []))))
 
     
     def update_metadata_from_scene(self):
@@ -440,9 +444,8 @@ class G1Mmodel():
     def parse_skeleton(self):
         self.skeleton = parseSkelG1M(self.g1m_data)
         self.arm = create_armature_from_bone_list(self.skeleton)
-        # rename_bones(self.arm, self.botw_bones)
     
-    def process_objects(self, rename_bones_flag):
+    def process_objects(self, rename_bones_flag, rotate_arm=False):
         col = bpy.data.collections.get("Collection")
         if col is None:
             col = next((c for c in bpy.data.collections), None)
@@ -457,7 +460,11 @@ class G1Mmodel():
             for uvmap in ob.data.uv_layers:
                 uvmap.name = 'UVMap'
         self.arm.scale = (0.01, 0.01, 0.01)
+        # For single bones armatures created by parse_skeleton
+        if rotate_arm:
+            self.arm.rotation_euler = (math.radians(-90), 0, 0)
         apply_transforms([self.arm])
+        apply_transforms(self.meshes) #apply it multiple times, just to be sure
         if rename_bones_flag:
             rename_bones(self.arm, self.botw_bones)
             for ob in self.meshes:

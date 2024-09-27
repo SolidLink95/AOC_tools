@@ -19,3 +19,6 @@
 [submodule "FFmpeg"]
 	path = FFmpeg
 	url = https://github.com/FFmpeg/FFmpeg.git
+[submodule "src_c/cJSON"]
+	path = src_c/cJSON
+	url = https://github.com/DaveGamble/cJSON

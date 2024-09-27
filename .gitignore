@@ -31,10 +31,12 @@
 *.out
 *.app
 
+# Debug files
+*.grp
+
 
 # *.g1t
 # *.g1m
-
 
 /tmp
 /.vscode
@@ -46,6 +48,7 @@
 /src/tmp
 
 # submodules
+/src_c/cJSON
 /stb
 /gust_stuff
 /eternity_common

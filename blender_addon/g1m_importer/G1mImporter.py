@@ -456,8 +456,9 @@ class G1Mmodel():
             # col.objects.link(ob)
             add_armature_modifier(ob, self.arm)
             ob.parent = self.arm
-            
-            for uvmap in ob.data.uv_layers:
+            ob["uvs"] = {}
+            for i, uvmap in enumerate(ob.data.uv_layers):
+                ob["uvs"][str(i)] = str(uvmap.name)
                 uvmap.name = 'UVMap'
         self.arm.scale = (0.01, 0.01, 0.01)
         # For single bones armatures created by parse_skeleton

@@ -108,7 +108,7 @@ if __name__ == "__main__":
     yuzu_mods = Path(r"W:\AOC_modding\_MODS")
     #aoc.swap_model("cd4ed2ed", "26a3f1f2", yuzu_mods / "Swap_gerudovai_to_royalguard")
     #aoc.swap_model("e2211005", "26a3f1f2", yuzu_mods / "Swap_gerudovai_to_royalguard")
-    aoc.swap_model("c63f1322", "7e52fec7", yuzu_mods / "tree_branch_test")
+    #aoc.swap_model("c63f1322", "7e52fec7", yuzu_mods / "tree_branch_test")
     #aoc.swap_model("b4736804", "b5e9b96d", yuzu_mods / "Archaic_set_over_Snowquill")
     #aoc.swap_model("cd4ed2ed", "b5e9b96d", yuzu_mods / "Archaic_set_over_Snowquill")
     #aoc.swap_model("b4736804", "bd554845", yuzu_mods / "Archaic_set_over_Snowquill")
@@ -117,12 +117,18 @@ if __name__ == "__main__":
     #aoc.swap_model("c7794a38", "68dd50eb", yuzu_mods / "Hollow_Daruk")
     #aoc.swap_model("bae054b7", "68dd50eb", yuzu_mods / "Hollow_Daruk")
     
+    aoc.swap_model("2ab808da", "1fe001d9", yuzu_mods / "Vagrant_King")
+    aoc.swap_model("7a7742f6", "1fe001d9", yuzu_mods / "Vagrant_King")
+    aoc.swap_model("9bafb4d8", "1fe001d9", yuzu_mods / "Vagrant_King")
+    aoc.swap_model("2ab808da", "1fe001d9", yuzu_mods / "Vagrant_King")
     
-    #aoc.swap_model("9a9e9a45", "c5468f47", yuzu_mods / "Hollow_Terrako")
-    #aoc.swap_model("a5df5a3e", "c5468f47", yuzu_mods / "Hollow_Terrako")
-    #aoc.swap_model("0967ca97", "c5468f47", yuzu_mods / "Hollow_Terrako")
-    #aoc.swap_model("212454e4", "c5468f47", yuzu_mods / "Hollow_Terrako")
-    #aoc.swap_model("8d932507", "c5468f47", yuzu_mods / "Hollow_Terrako") #cutscene, breaks
+    
+    aoc.swap_model("9a9e9a45", "c5468f47", yuzu_mods / "Hollow_Terrako")
+    aoc.swap_model("a5df5a3e", "c5468f47", yuzu_mods / "Hollow_Terrako")
+    aoc.swap_model("0967ca97", "c5468f47", yuzu_mods / "Hollow_Terrako")
+    aoc.swap_model("212454e4", "c5468f47", yuzu_mods / "Hollow_Terrako")
+    aoc.swap_model("c5468f47", "212454e4", yuzu_mods / "Hollow_Terrako")
+    aoc.swap_model("8d932507", "c5468f47", yuzu_mods / "Hollow_Terrako") #cutscene, breaks
     
     # aoc.swap_model("9a9e9a45", "1418dfa6", yuzu_mods / "Broken_Terrako")
     # aoc.swap_model("a5df5a3e", "1418dfa6", yuzu_mods / "Broken_Terrako")

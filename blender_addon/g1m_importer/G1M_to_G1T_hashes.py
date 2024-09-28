@@ -1,33 +1,4 @@
-
 g1m_to_g1t_hashes = {
-    "e96046e8": {
-        "g1t": "90332493",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "e8775294": {
-        "g1t": "73fd8e67",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "d322bf57": {
-        "g1t": "debfba04",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "bba216ce": {
-        "g1t": "062b516d",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "b62b24b8": {
-        "g1t": "5cc400c3",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "a28438de": {
-        "g1t": "fb8d715d",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
-    "49c9ef33": {
-        "g1t": "3cfe85a8",
-        "kidsobjdb": "CharacterEditor.kidssingletondb"
-    },
     "000bfa4b": {
         "g1t": "4efddd90",
         "kidsobjdb": "896f1e4e.kidsobjdb"
@@ -99,6 +70,10 @@ g1m_to_g1t_hashes = {
     "004a92d2": {
         "g1t": "569255e9",
         "kidsobjdb": "b522085d.kidsobjdb"
+    },
+    "004bb2f5": {
+        "g1t": "56b53a26",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "0050b82c": {
         "g1t": "5750dbcf",
@@ -264,6 +239,10 @@ g1m_to_g1t_hashes = {
         "g1t": "722d3178",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "013331ea": {
+        "g1t": "72bd99d1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "01349cd7": {
         "g1t": "72e98c84",
         "kidsobjdb": "b2823bcc.kidsobjdb"
@@ -315,6 +294,10 @@ g1m_to_g1t_hashes = {
     "016b452b": {
         "g1t": "7987eeb0",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
+    },
+    "0170b04a": {
+        "g1t": "7a2fe771",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "0170f45c": {
         "g1t": "7a38259f",
@@ -616,6 +599,10 @@ g1m_to_g1t_hashes = {
         "g1t": "afbb2a20",
         "kidsobjdb": "972dbe49.kidsobjdb"
     },
+    "032d46f0": {
+        "g1t": "b006258b",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "033bfbb1": {
         "g1t": "b1ce08ea",
         "kidsobjdb": "2cd583b5.kidsobjdb"
@@ -707,6 +694,10 @@ g1m_to_g1t_hashes = {
     "03d87f54": {
         "g1t": "ed215b53",
         "kidsobjdb": "b522085d.kidsobjdb"
+    },
+    "03e43062": {
+        "g1t": "c62c6a59",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "03f39687": {
         "g1t": "c809c8d4",
@@ -1255,6 +1246,10 @@ g1m_to_g1t_hashes = {
     "0734858d": {
         "g1t": "2ce6ba8e",
         "kidsobjdb": "f3612a90.kidsobjdb"
+    },
+    "073a04b2": {
+        "g1t": "2d912009",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "073c47d4": {
         "g1t": "2dd74127",
@@ -2040,6 +2035,10 @@ g1m_to_g1t_hashes = {
         "g1t": "bad62fdf",
         "kidsobjdb": "398598b9.kidsobjdb"
     },
+    "0bd08252": {
+        "g1t": "bbca5669",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "0bd4dc27": {
         "g1t": "bc513734",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
@@ -2340,6 +2339,10 @@ g1m_to_g1t_hashes = {
         "g1t": "fccf6ffa",
         "kidsobjdb": "b740b065.kidsobjdb"
     },
+    "0deac961": {
+        "g1t": "fcf8f13a",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "0dec6eab": {
         "g1t": "9edf27d0",
         "kidsobjdb": "b2823bcc.kidsobjdb"
@@ -2446,6 +2449,10 @@ g1m_to_g1t_hashes = {
     },
     "0e8fd624": {
         "g1t": "10f57cd7",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "0e98de32": {
+        "g1t": "120d7689",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "0ea112b2": {
@@ -2880,6 +2887,10 @@ g1m_to_g1t_hashes = {
         "g1t": "746a5359",
         "kidsobjdb": "da2d9c3b.kidsobjdb"
     },
+    "11c5e069": {
+        "g1t": "7480bb32",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "11cafc51": {
         "g1t": "751f1c4a",
         "kidsobjdb": "57b8f3b2.kidsobjdb"
@@ -2984,9 +2995,17 @@ g1m_to_g1t_hashes = {
         "g1t": "881b37f4",
         "kidsobjdb": "c82dfdab.kidsobjdb"
     },
+    "126b7483": {
+        "g1t": "888daa58",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "12779dea": {
         "g1t": "8a06add1",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
+    },
+    "127fdca3": {
+        "g1t": "8b064638",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "129c236c": {
         "g1t": "8e72d88f",
@@ -3576,6 +3595,10 @@ g1m_to_g1t_hashes = {
         "g1t": "6f8ed1b3",
         "kidsobjdb": "c5cccb85.kidsobjdb"
     },
+    "160b6e5b": {
+        "g1t": "f8eceb80",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "160bc2f5": {
         "g1t": "f8f72a26",
         "kidsobjdb": "b2823bcc.kidsobjdb"
@@ -4035,6 +4058,10 @@ g1m_to_g1t_hashes = {
     "18f8b93e": {
         "g1t": "53a8fcfd",
         "kidsobjdb": "bf74ad2a.kidsobjdb"
+    },
+    "19061cec": {
+        "g1t": "55480f0f",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "19084ff5": {
         "g1t": "558c3d26",
@@ -4499,6 +4526,10 @@ g1m_to_g1t_hashes = {
     "1c6ba3e6": {
         "g1t": "8b94c9ec",
         "kidsobjdb": "c5cccb85.kidsobjdb"
+    },
+    "1c6bd2a5": {
+        "g1t": "be991076",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "1c824098": {
         "g1t": "c15060e3",
@@ -4987,6 +5018,10 @@ g1m_to_g1t_hashes = {
     "1f54da34": {
         "g1t": "18d0fac7",
         "kidsobjdb": "fff123d9.kidsobjdb"
+    },
+    "1f5cd3ee": {
+        "g1t": "19c8384d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "1f6164a3": {
         "g1t": "569fd8a8",
@@ -6120,6 +6155,10 @@ g1m_to_g1t_hashes = {
         "g1t": "030ffecb",
         "kidsobjdb": "8f2a21cf.kidsobjdb"
     },
+    "270e8a01": {
+        "g1t": "084d449a",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "2712cc21": {
         "g1t": "08d1467a",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
@@ -6267,6 +6306,10 @@ g1m_to_g1t_hashes = {
     "27d3e5a0": {
         "g1t": "20335cdb",
         "kidsobjdb": "398598b9.kidsobjdb"
+    },
+    "27e6df23": {
+        "g1t": "227f93b8",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "27e97d1c": {
         "g1t": "54d81665",
@@ -7248,6 +7291,10 @@ g1m_to_g1t_hashes = {
         "g1t": "f7a218aa",
         "kidsobjdb": "b157c8a0.kidsobjdb"
     },
+    "2ecdf907": {
+        "g1t": "f87bb654",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "2ece5771": {
         "g1t": "f887252a",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -7283,6 +7330,10 @@ g1m_to_g1t_hashes = {
     "2ef5e897": {
         "g1t": "3abae8bf",
         "kidsobjdb": "d55cce42.kidsobjdb"
+    },
+    "2f007a4e": {
+        "g1t": "fe995ded",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "2f13077d": {
         "g1t": "00d8769e",
@@ -7419,6 +7470,10 @@ g1m_to_g1t_hashes = {
     "2fff9031": {
         "g1t": "1d7d046a",
         "kidsobjdb": "2cd583b5.kidsobjdb"
+    },
+    "300413c5": {
+        "g1t": "1e08f356",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "30061640": {
         "g1t": "b98cf74d",
@@ -8332,6 +8387,10 @@ g1m_to_g1t_hashes = {
         "g1t": "d724b35d",
         "kidsobjdb": "d55cce42.kidsobjdb"
     },
+    "360c066f": {
+        "g1t": "d8ff55ec",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "361de679": {
         "g1t": "db297722",
         "kidsobjdb": "2ee322d5.kidsobjdb"
@@ -8359,6 +8418,10 @@ g1m_to_g1t_hashes = {
     "366c27e1": {
         "g1t": "409a1bc2",
         "kidsobjdb": "7aa438cd.kidsobjdb"
+    },
+    "36747403": {
+        "g1t": "e5a49ad8",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "36754e8f": {
         "g1t": "e5bf11cc",
@@ -8688,6 +8751,10 @@ g1m_to_g1t_hashes = {
         "g1t": "2bdc6e12",
         "kidsobjdb": "2ee322d5.kidsobjdb"
     },
+    "38be12e5": {
+        "g1t": "2c8ed836",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "38c62f44": {
         "g1t": "2d8a47b7",
         "kidsobjdb": "896f1e4e.kidsobjdb"
@@ -8695,6 +8762,10 @@ g1m_to_g1t_hashes = {
     "38c9dd08": {
         "g1t": "2dfc5273",
         "kidsobjdb": "b2823bcc.kidsobjdb"
+    },
+    "38cc55a1": {
+        "g1t": "2e48ecfa",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "38dc32ba": {
         "g1t": "3034b301",
@@ -9860,6 +9931,10 @@ g1m_to_g1t_hashes = {
         "g1t": "invalid_g1t",
         "kidsobjdb": "MaterialEditor.kidssingletondb"
     },
+    "405808c7": {
+        "g1t": "18339e94",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "4060ffdd": {
         "g1t": "19498a3e",
         "kidsobjdb": "398598b9.kidsobjdb"
@@ -9899,6 +9974,10 @@ g1m_to_g1t_hashes = {
     "407c09e9": {
         "g1t": "1c8fc1b2",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
+    },
+    "40820d63": {
+        "g1t": "1d4a2d78",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "408b180d": {
         "g1t": "1e62780e",
@@ -10098,6 +10177,10 @@ g1m_to_g1t_hashes = {
     },
     "41ead70d": {
         "g1t": "48fa990e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "42032f44": {
+        "g1t": "4bed47b7",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "421145e3": {
@@ -10748,6 +10831,10 @@ g1m_to_g1t_hashes = {
         "g1t": "c8b22483",
         "kidsobjdb": "c82dfdab.kidsobjdb"
     },
+    "46181a63": {
+        "g1t": "ca75c078",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "46235211": {
         "g1t": "cbd17e8a",
         "kidsobjdb": "c0f8c53b.kidsobjdb"
@@ -11180,6 +11267,10 @@ g1m_to_g1t_hashes = {
         "g1t": "17b04dba",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "4897227c": {
+        "g1t": "17d7bb7f",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "4898822b": {
         "g1t": "d7dc4e1c",
         "kidsobjdb": "b2823bcc.kidsobjdb"
@@ -11336,6 +11427,10 @@ g1m_to_g1t_hashes = {
         "g1t": "3cfc93f6",
         "kidsobjdb": "7aa438cd.kidsobjdb"
     },
+    "49c9ef33": {
+        "g1t": "3cfe85a8",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "49e41940": {
         "g1t": "40299d3b",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -11403,6 +11498,10 @@ g1m_to_g1t_hashes = {
     "4a3d762a": {
         "g1t": "4afbdd91",
         "kidsobjdb": "43ce723b.kidsobjdb"
+    },
+    "4a4118fa": {
+        "g1t": "4b6c94c1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "4a4472b2": {
         "g1t": "d390a96d",
@@ -11712,6 +11811,10 @@ g1m_to_g1t_hashes = {
         "g1t": "87d9be88",
         "kidsobjdb": "43ce723b.kidsobjdb"
     },
+    "4c34ee38": {
+        "g1t": "87f36743",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "4c3815e7": {
         "g1t": "88553574",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -11828,6 +11931,10 @@ g1m_to_g1t_hashes = {
         "g1t": "a2afc8cc",
         "kidsobjdb": "8f2a21cf.kidsobjdb"
     },
+    "4d22acf5": {
+        "g1t": "a4bd8026",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "4d2817d8": {
         "g1t": "a56571a3",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -11887,6 +11994,10 @@ g1m_to_g1t_hashes = {
     "4d8957c3": {
         "g1t": "b12c2f18",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
+    },
+    "4d8b1bad": {
+        "g1t": "b162e86e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "4d8ddcd3": {
         "g1t": "bb1a19ba",
@@ -12164,6 +12275,10 @@ g1m_to_g1t_hashes = {
         "g1t": "f32234bc",
         "kidsobjdb": "fff123d9.kidsobjdb"
     },
+    "4fac1b3b": {
+        "g1t": "f361daa0",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "4fb76585": {
         "g1t": "f4bfd996",
         "kidsobjdb": "54be3f86.kidsobjdb"
@@ -12431,6 +12546,10 @@ g1m_to_g1t_hashes = {
     "5149523b": {
         "g1t": "256b83a0",
         "kidsobjdb": "d55cce42.kidsobjdb"
+    },
+    "514e7e21": {
+        "g1t": "260bd47a",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "5157ea60": {
         "g1t": "272ff01b",
@@ -13880,6 +13999,14 @@ g1m_to_g1t_hashes = {
         "g1t": "32b8da3b",
         "kidsobjdb": "b2823bcc.kidsobjdb"
     },
+    "5a0a45cd": {
+        "g1t": "34c9024e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "5a100255": {
+        "g1t": "357ad6c6",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "5a1d759d": {
         "g1t": "ceba9573",
         "kidsobjdb": "c82dfdab.kidsobjdb"
@@ -14264,6 +14391,10 @@ g1m_to_g1t_hashes = {
         "g1t": "7c84e982",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "5c60da88": {
+        "g1t": "7d4504f3",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "5c646fda": {
         "g1t": "7db419e1",
         "kidsobjdb": "2ee322d5.kidsobjdb"
@@ -14427,6 +14558,10 @@ g1m_to_g1t_hashes = {
     "5dbf8f12": {
         "g1t": "a7bce1a9",
         "kidsobjdb": "c82dfdab.kidsobjdb"
+    },
+    "5dc53599": {
+        "g1t": "a86c0c02",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "5dd012b4": {
         "g1t": "a9bcd247",
@@ -14796,6 +14931,10 @@ g1m_to_g1t_hashes = {
         "g1t": "fa2e0f1e",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "606a2eae": {
+        "g1t": "fa66358d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "606d90bc": {
         "g1t": "03e84155",
         "kidsobjdb": "b522085d.kidsobjdb"
@@ -14916,6 +15055,10 @@ g1m_to_g1t_hashes = {
         "g1t": "ca56c553",
         "kidsobjdb": "7aa438cd.kidsobjdb"
     },
+    "611802fa": {
+        "g1t": "0f72eac1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "611b7e17": {
         "g1t": "7fbb3060",
         "kidsobjdb": "edf72518.kidsobjdb"
@@ -14987,6 +15130,10 @@ g1m_to_g1t_hashes = {
     "61acb468": {
         "g1t": "21746713",
         "kidsobjdb": "54be3f86.kidsobjdb"
+    },
+    "61c3a6ba": {
+        "g1t": "243bbf01",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "61df2146": {
         "g1t": "80955937",
@@ -15083,6 +15230,14 @@ g1m_to_g1t_hashes = {
     "62a5ab78": {
         "g1t": "3f9a5203",
         "kidsobjdb": "896f1e4e.kidsobjdb"
+    },
+    "62a5ad15": {
+        "g1t": "3f9a8406",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "62a889f9": {
+        "g1t": "3ff343a2",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "62a8ea22": {
         "g1t": "3ffee899",
@@ -16108,6 +16263,10 @@ g1m_to_g1t_hashes = {
         "g1t": "10067d91",
         "kidsobjdb": "b2823bcc.kidsobjdb"
     },
+    "696716cc": {
+        "g1t": "1106512f",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "696b5ec7": {
         "g1t": "118b0894",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
@@ -16584,6 +16743,10 @@ g1m_to_g1t_hashes = {
         "g1t": "7714ea2e",
         "kidsobjdb": "43ce723b.kidsobjdb"
     },
+    "6cb3693c": {
+        "g1t": "77444cbf",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "6cb5babc": {
         "g1t": "18f044dc",
         "kidsobjdb": "2ee322d5.kidsobjdb"
@@ -16884,6 +17047,10 @@ g1m_to_g1t_hashes = {
         "g1t": "baf1d3eb",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
     },
+    "6ee3d10a": {
+        "g1t": "bb20deb1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "6ee6bac1": {
         "g1t": "bb7b2bda",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
@@ -17156,6 +17323,10 @@ g1m_to_g1t_hashes = {
         "g1t": "f2abd64b",
         "kidsobjdb": "59bcf153.kidsobjdb"
     },
+    "70b1da5d": {
+        "g1t": "f313ffbe",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "70b7738b": {
         "g1t": "f3c18c50",
         "kidsobjdb": "54be3f86.kidsobjdb"
@@ -17316,6 +17487,10 @@ g1m_to_g1t_hashes = {
         "g1t": "1728d311",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
     },
+    "71dc4528": {
+        "g1t": "1736ee53",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "71e3fe33": {
         "g1t": "182656a8",
         "kidsobjdb": "896f1e4e.kidsobjdb"
@@ -17440,6 +17615,10 @@ g1m_to_g1t_hashes = {
         "g1t": "2bd7608f",
         "kidsobjdb": "1a8d2732.kidsobjdb"
     },
+    "72897ac7": {
+        "g1t": "2c306c94",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "72963089": {
         "g1t": "2dba6f12",
         "kidsobjdb": "f3612a90.kidsobjdb"
@@ -17495,6 +17674,10 @@ g1m_to_g1t_hashes = {
     "72db7405": {
         "g1t": "45df94d7",
         "kidsobjdb": "54be3f86.kidsobjdb"
+    },
+    "72e2422b": {
+        "g1t": "36f091b0",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "72eeba4e": {
         "g1t": "38731ded",
@@ -17756,6 +17939,10 @@ g1m_to_g1t_hashes = {
         "g1t": "6d78844a",
         "kidsobjdb": "da2d9c3b.kidsobjdb"
     },
+    "74b04b7e": {
+        "g1t": "6ee3b2bd",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "74bce671": {
         "g1t": "706a762a",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
@@ -17899,6 +18086,10 @@ g1m_to_g1t_hashes = {
     "75dc04a6": {
         "g1t": "932f1e95",
         "kidsobjdb": "57b8f3b2.kidsobjdb"
+    },
+    "75df9a8a": {
+        "g1t": "939e4531",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "75e33b38": {
         "g1t": "940eba43",
@@ -18136,6 +18327,10 @@ g1m_to_g1t_hashes = {
         "g1t": "3b993f46",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
     },
+    "77509c4e": {
+        "g1t": "c04d7bed",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "77626a5d": {
         "g1t": "c2756fbe",
         "kidsobjdb": "f3612a90.kidsobjdb"
@@ -18143,6 +18338,10 @@ g1m_to_g1t_hashes = {
     "7769eb09": {
         "g1t": "c35e0492",
         "kidsobjdb": "2cd583b5.kidsobjdb"
+    },
+    "776dfc35": {
+        "g1t": "c3dc18e6",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "776fd3e7": {
         "g1t": "608169f7",
@@ -18323,6 +18522,10 @@ g1m_to_g1t_hashes = {
     "78ae0967": {
         "g1t": "ea9db1f4",
         "kidsobjdb": "c0f8c53b.kidsobjdb"
+    },
+    "78aebc9f": {
+        "g1t": "eab365bc",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "78b58f70": {
         "g1t": "eb86ed0b",
@@ -18884,6 +19087,10 @@ g1m_to_g1t_hashes = {
         "g1t": "5857c3d8",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
     },
+    "7c4e33be": {
+        "g1t": "5b02d27d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "7c54b3e0": {
         "g1t": "5bcc569b",
         "kidsobjdb": "c82dfdab.kidsobjdb"
@@ -18986,6 +19193,10 @@ g1m_to_g1t_hashes = {
     },
     "7cf3ee3e": {
         "g1t": "6f1467fd",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "7cf62ecf": {
+        "g1t": "6f5a398c",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "7cf83c67": {
@@ -19291,6 +19502,10 @@ g1m_to_g1t_hashes = {
     "7ec73f89": {
         "g1t": "f8aa5482",
         "kidsobjdb": "bf74ad2a.kidsobjdb"
+    },
+    "7ec95fb0": {
+        "g1t": "a7ed24cb",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "7ec9c6b5": {
         "g1t": "a7f99e66",
@@ -20188,6 +20403,10 @@ g1m_to_g1t_hashes = {
         "g1t": "58649958",
         "kidsobjdb": "59bcf153.kidsobjdb"
     },
+    "8483b409": {
+        "g1t": "597d5b92",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "84878c22": {
         "g1t": "9a5ad8b6",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
@@ -20640,6 +20859,10 @@ g1m_to_g1t_hashes = {
         "g1t": "a2cc0198",
         "kidsobjdb": "b2823bcc.kidsobjdb"
     },
+    "8810bc59": {
+        "g1t": "c7915d42",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "8813a91c": {
         "g1t": "c7ec08df",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -20699,6 +20922,10 @@ g1m_to_g1t_hashes = {
     "8880c612": {
         "g1t": "6b29625e",
         "kidsobjdb": "f3612a90.kidsobjdb"
+    },
+    "8882252a": {
+        "g1t": "d54d0e91",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "8891aaa2": {
         "g1t": "d72e3819",
@@ -21044,6 +21271,10 @@ g1m_to_g1t_hashes = {
         "g1t": "26642492",
         "kidsobjdb": "b2823bcc.kidsobjdb"
     },
+    "8b238949": {
+        "g1t": "26d82e52",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "8b2ea5bf": {
         "g1t": "2830a09c",
         "kidsobjdb": "2cd583b5.kidsobjdb"
@@ -21063,6 +21294,10 @@ g1m_to_g1t_hashes = {
     "8b3e4e29": {
         "g1t": "2a160572",
         "kidsobjdb": "b740b065.kidsobjdb"
+    },
+    "8b41bcd7": {
+        "g1t": "2a806c84",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "8b4fb09c": {
         "g1t": "2c30f15f",
@@ -21191,6 +21426,10 @@ g1m_to_g1t_hashes = {
     "8bef147a": {
         "g1t": "3f7e0941",
         "kidsobjdb": "896f1e4e.kidsobjdb"
+    },
+    "8bf1da1e": {
+        "g1t": "3fd3f81d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "8bf36815": {
         "g1t": "40042906",
@@ -21908,6 +22147,10 @@ g1m_to_g1t_hashes = {
         "g1t": "c72938e1",
         "kidsobjdb": "398598b9.kidsobjdb"
     },
+    "90518fe2": {
+        "g1t": "c76afad9",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "906279a5": {
         "g1t": "c9774976",
         "kidsobjdb": "c82dfdab.kidsobjdb"
@@ -22143,6 +22386,10 @@ g1m_to_g1t_hashes = {
     "91f0e8b1": {
         "g1t": "f9b6bbea",
         "kidsobjdb": "b522085d.kidsobjdb"
+    },
+    "91f6b9a6": {
+        "g1t": "fa6b0995",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "91fb16f0": {
         "g1t": "faf2558b",
@@ -22440,6 +22687,10 @@ g1m_to_g1t_hashes = {
         "g1t": "3a2482be",
         "kidsobjdb": "57b8f3b2.kidsobjdb"
     },
+    "940bdbca": {
+        "g1t": "3afa2bf1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "941c2b3c": {
         "g1t": "3cf3cabf",
         "kidsobjdb": "edf72518.kidsobjdb"
@@ -22639,6 +22890,10 @@ g1m_to_g1t_hashes = {
     "957bce5d": {
         "g1t": "4f1a9d13",
         "kidsobjdb": "c82dfdab.kidsobjdb"
+    },
+    "95a24f7a": {
+        "g1t": "6c322e41",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "95a27f3e": {
         "g1t": "a3a18c15",
@@ -22920,6 +23175,10 @@ g1m_to_g1t_hashes = {
         "g1t": "a4958cea",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
     },
+    "978081b2": {
+        "g1t": "a61a4309",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "9783e0b5": {
         "g1t": "a682c466",
         "kidsobjdb": "43ce723b.kidsobjdb"
@@ -22972,6 +23231,10 @@ g1m_to_g1t_hashes = {
         "g1t": "b1cbbb45",
         "kidsobjdb": "b2823bcc.kidsobjdb"
     },
+    "97ee610c": {
+        "g1t": "b3684eef",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "97f2d6b3": {
         "g1t": "b3f28e28",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
@@ -22987,6 +23250,10 @@ g1m_to_g1t_hashes = {
     "98001d4b": {
         "g1t": "b58e1a90",
         "kidsobjdb": "50118af9.kidsobjdb"
+    },
+    "980a4ceb": {
+        "g1t": "b6c9def0",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "98104839": {
         "g1t": "9ac4c727",
@@ -23132,6 +23399,10 @@ g1m_to_g1t_hashes = {
         "g1t": "d6f41ff0",
         "kidsobjdb": "54be3f86.kidsobjdb"
     },
+    "991e4406": {
+        "g1t": "d834cb35",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "99292992": {
         "g1t": "d9869729",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
@@ -23226,6 +23497,10 @@ g1m_to_g1t_hashes = {
     },
     "999f01e9": {
         "g1t": "e7cbc9b2",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "99a0c09b": {
+        "g1t": "e801e140",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "99a906e6": {
@@ -23964,6 +24239,10 @@ g1m_to_g1t_hashes = {
         "g1t": "baf32f40",
         "kidsobjdb": "2ee322d5.kidsobjdb"
     },
+    "9f285c6e": {
+        "g1t": "936dbfcd",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "9f306979": {
         "g1t": "94675422",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -24087,6 +24366,10 @@ g1m_to_g1t_hashes = {
     "9fdc2d1d": {
         "g1t": "a67d06bb",
         "kidsobjdb": "57b8f3b2.kidsobjdb"
+    },
+    "9ff53642": {
+        "g1t": "ac3c2079",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "CE1CharacterPartsSet\u010f\u013d\u00bbPHF_COS_035\u010f\u013d\u02dd\u010f\u013d\u00bb65\u010f\u013d\u02dd": {
         "g1t": "52b84bb7",
@@ -24247,6 +24530,10 @@ g1m_to_g1t_hashes = {
     "a14b8395": {
         "g1t": "d5af7d86",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
+    },
+    "a153d8b1": {
+        "g1t": "d6b1cbea",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "a156e7c3": {
         "g1t": "d7109f18",
@@ -24423,6 +24710,10 @@ g1m_to_g1t_hashes = {
     "a280f703": {
         "g1t": "a1086645",
         "kidsobjdb": "f3612a90.kidsobjdb"
+    },
+    "a28438de": {
+        "g1t": "fb8d715d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "a28c3ca0": {
         "g1t": "648122aa",
@@ -25208,6 +25499,10 @@ g1m_to_g1t_hashes = {
         "g1t": "9f4f9c08",
         "kidsobjdb": "8f2a21cf.kidsobjdb"
     },
+    "a7ceb317": {
+        "g1t": "9f923e44",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "a7d122f8": {
         "g1t": "9fddca83",
         "kidsobjdb": "fff123d9.kidsobjdb"
@@ -25447,6 +25742,10 @@ g1m_to_g1t_hashes = {
     "a9c7dbdd": {
         "g1t": "dcbe2e3e",
         "kidsobjdb": "b522085d.kidsobjdb"
+    },
+    "a9cbf438": {
+        "g1t": "dd3d2143",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "a9cd7e23": {
         "g1t": "dd6cd4b8",
@@ -26960,6 +27259,10 @@ g1m_to_g1t_hashes = {
         "g1t": "0ce769e0",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
     },
+    "b39b63be": {
+        "g1t": "0d5ba27d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "b3a9b3cf": {
         "g1t": "0f17548c",
         "kidsobjdb": "398598b9.kidsobjdb"
@@ -27091,6 +27394,10 @@ g1m_to_g1t_hashes = {
     "b486e82c": {
         "g1t": "29e0abcf",
         "kidsobjdb": "b2823bcc.kidsobjdb"
+    },
+    "b496e0d1": {
+        "g1t": "2bcfc7ca",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "b4a69d32": {
         "g1t": "2db79789",
@@ -27331,6 +27638,10 @@ g1m_to_g1t_hashes = {
     "b62813af": {
         "g1t": "5c64f0ac",
         "kidsobjdb": "bf74ad2a.kidsobjdb"
+    },
+    "b62b24b8": {
+        "g1t": "5cc400c3",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "b6456fc8": {
         "g1t": "5ff317b3",
@@ -27735,6 +28046,10 @@ g1m_to_g1t_hashes = {
     "b96eb75f": {
         "g1t": "af9bdc8e",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
+    },
+    "b96f9a98": {
+        "g1t": "c20e46e3",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "b986e33e": {
         "g1t": "c4e012fd",
@@ -28152,6 +28467,10 @@ g1m_to_g1t_hashes = {
         "g1t": "fd634669",
         "kidsobjdb": "fff123d9.kidsobjdb"
     },
+    "bb6212e1": {
+        "g1t": "fe6ad7ba",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "bb674eaf": {
         "g1t": "ff0d15ac",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -28183,6 +28502,10 @@ g1m_to_g1t_hashes = {
     "bb9e4065": {
         "g1t": "05b45ab6",
         "kidsobjdb": "b740b065.kidsobjdb"
+    },
+    "bba216ce": {
+        "g1t": "062b516d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "bba98842": {
         "g1t": "07120e79",
@@ -28299,6 +28622,10 @@ g1m_to_g1t_hashes = {
     "bc47e824": {
         "g1t": "4ad70ace",
         "kidsobjdb": "7aa438cd.kidsobjdb"
+    },
+    "bc5aba56": {
+        "g1t": "1c871ee5",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "bc64685b": {
         "g1t": "cd676875",
@@ -28500,6 +28827,10 @@ g1m_to_g1t_hashes = {
         "g1t": "4d19cbcb",
         "kidsobjdb": "b740b065.kidsobjdb"
     },
+    "bdf0d3ed": {
+        "g1t": "4db4382e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "bdf54a21": {
         "g1t": "4e3e887a",
         "kidsobjdb": "d55cce42.kidsobjdb"
@@ -28696,6 +29027,10 @@ g1m_to_g1t_hashes = {
         "g1t": "70afa497",
         "kidsobjdb": "c5cccb85.kidsobjdb"
     },
+    "bf11beca": {
+        "g1t": "70b0a8f1",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "bf245553": {
         "g1t": "72f0e388",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
@@ -28751,6 +29086,10 @@ g1m_to_g1t_hashes = {
     "bf71ce77": {
         "g1t": "7c528ee4",
         "kidsobjdb": "398598b9.kidsobjdb"
+    },
+    "bf730b5d": {
+        "g1t": "7c78eebe",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "bf74f6fd": {
         "g1t": "7cb4771e",
@@ -28907,6 +29246,10 @@ g1m_to_g1t_hashes = {
     "c093172e": {
         "g1t": "9f5a5d0d",
         "kidsobjdb": "fff123d9.kidsobjdb"
+    },
+    "c093b654": {
+        "g1t": "9f6da2a7",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "c0962648": {
         "g1t": "9fb93133",
@@ -29796,6 +30139,10 @@ g1m_to_g1t_hashes = {
         "g1t": "4f2ddf99",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "c63f4cbe": {
+        "g1t": "4f34d97d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "c643526c": {
         "g1t": "4fb1898f",
         "kidsobjdb": "c0f8c53b.kidsobjdb"
@@ -30424,6 +30771,10 @@ g1m_to_g1t_hashes = {
         "g1t": "c7ace69b",
         "kidsobjdb": "edf72518.kidsobjdb"
     },
+    "ca230f41": {
+        "g1t": "c7c9675a",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "ca241560": {
         "g1t": "c7e9251b",
         "kidsobjdb": "b522085d.kidsobjdb"
@@ -30447,6 +30798,10 @@ g1m_to_g1t_hashes = {
     "ca4a7e66": {
         "g1t": "cc8fdcd5",
         "kidsobjdb": "7aa438cd.kidsobjdb"
+    },
+    "ca602734": {
+        "g1t": "cf2f4dc7",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "ca61d6ad": {
         "g1t": "cf638d6e",
@@ -30816,6 +31171,10 @@ g1m_to_g1t_hashes = {
         "g1t": "964a33ce",
         "kidsobjdb": "1a8d2732.kidsobjdb"
     },
+    "ccd5bdbd": {
+        "g1t": "1b6c885e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "ccda1d2f": {
         "g1t": "1bf4172c",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
@@ -30927,6 +31286,10 @@ g1m_to_g1t_hashes = {
     "cd84b623": {
         "g1t": "2ac86d09",
         "kidsobjdb": "edf72518.kidsobjdb"
+    },
+    "cd854e4e": {
+        "g1t": "30af09ed",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "cd854efa": {
         "g1t": "30af1ec1",
@@ -31123,6 +31486,10 @@ g1m_to_g1t_hashes = {
     "ce67f870": {
         "g1t": "4c21a40b",
         "kidsobjdb": "2cd583b5.kidsobjdb"
+    },
+    "ce6de2ee": {
+        "g1t": "4cd9094d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "ce6fde19": {
         "g1t": "4d167382",
@@ -31732,6 +32099,10 @@ g1m_to_g1t_hashes = {
         "g1t": "c3a2f26c",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
     },
+    "d243b43b": {
+        "g1t": "c3bd61a0",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "d2552da3": {
         "g1t": "c5db1538",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -31779,6 +32150,10 @@ g1m_to_g1t_hashes = {
     "d287a768": {
         "g1t": "cbf7d413",
         "kidsobjdb": "d55cce42.kidsobjdb"
+    },
+    "d28d3ee6": {
+        "g1t": "cca52c55",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "d292a2dd": {
         "g1t": "cd4c473e",
@@ -31867,6 +32242,10 @@ g1m_to_g1t_hashes = {
     "d320b0a6": {
         "g1t": "cd4a6abb",
         "kidsobjdb": "54be3f86.kidsobjdb"
+    },
+    "d322bf57": {
+        "g1t": "debfba04",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "d3243c2a": {
         "g1t": "deedd791",
@@ -32132,6 +32511,10 @@ g1m_to_g1t_hashes = {
         "g1t": "16efd144",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "d4f662b7": {
+        "g1t": "176082a4",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "d5133680": {
         "g1t": "1ade27fb",
         "kidsobjdb": "398598b9.kidsobjdb"
@@ -32344,6 +32727,10 @@ g1m_to_g1t_hashes = {
         "g1t": "4ad80a44",
         "kidsobjdb": "fff123d9.kidsobjdb"
     },
+    "d6a6f4aa": {
+        "g1t": "4bc22f11",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "d6af1530": {
         "g1t": "69f30f7f",
         "kidsobjdb": "f3612a90.kidsobjdb"
@@ -32488,6 +32875,10 @@ g1m_to_g1t_hashes = {
         "g1t": "6859bae8",
         "kidsobjdb": "b522085d.kidsobjdb"
     },
+    "d7942eae": {
+        "g1t": "687c358d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "d79e7051": {
         "g1t": "69ba284a",
         "kidsobjdb": "b2823bcc.kidsobjdb"
@@ -32628,6 +33019,10 @@ g1m_to_g1t_hashes = {
         "g1t": "8184e8d7",
         "kidsobjdb": "2cd583b5.kidsobjdb"
     },
+    "d866a156": {
+        "g1t": "81f817e5",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "d86bd58e": {
         "g1t": "82996aad",
         "kidsobjdb": "f3612a90.kidsobjdb"
@@ -32743,6 +33138,10 @@ g1m_to_g1t_hashes = {
     "d931ec59": {
         "g1t": "9a962d42",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
+    },
+    "d9364387": {
+        "g1t": "9b1cbbd4",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "d936cf63": {
         "g1t": "9b2dab78",
@@ -33343,6 +33742,10 @@ g1m_to_g1t_hashes = {
     "dce6f3e9": {
         "g1t": "0d8217b2",
         "kidsobjdb": "b522085d.kidsobjdb"
+    },
+    "dce8beed": {
+        "g1t": "0db9ad2e",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "dcec10b5": {
         "g1t": "0e209466",
@@ -34140,6 +34543,10 @@ g1m_to_g1t_hashes = {
         "g1t": "e2b08d65",
         "kidsobjdb": "b522085d.kidsobjdb"
     },
+    "e1e3c711": {
+        "g1t": "a81fa98a",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e1f556a6": {
         "g1t": "aa400c95",
         "kidsobjdb": "2ee322d5.kidsobjdb"
@@ -34174,6 +34581,10 @@ g1m_to_g1t_hashes = {
     },
     "e2211005": {
         "g1t": "af8b7f16",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
+    "e221658e": {
+        "g1t": "af95daad",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "e228aeb2": {
@@ -34424,6 +34835,10 @@ g1m_to_g1t_hashes = {
         "g1t": "e954be9d",
         "kidsobjdb": "b522085d.kidsobjdb"
     },
+    "e40a3865": {
+        "g1t": "eac762b6",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e40f34d9": {
         "g1t": "invalid_g1t",
         "kidsobjdb": "MaterialEditor.kidssingletondb"
@@ -34644,6 +35059,10 @@ g1m_to_g1t_hashes = {
         "g1t": "0848bd22",
         "kidsobjdb": "285e556f.kidsobjdb"
     },
+    "e5021c29": {
+        "g1t": "08cbf772",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e5070c5d": {
         "g1t": "09650dbe",
         "kidsobjdb": "2cd583b5.kidsobjdb"
@@ -34683,6 +35102,10 @@ g1m_to_g1t_hashes = {
     "e556703d": {
         "g1t": "130225de",
         "kidsobjdb": "1a4dfc3b.kidsobjdb"
+    },
+    "e5583950": {
+        "g1t": "13397f2b",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "e5584d55": {
         "g1t": "133bebc6",
@@ -34807,6 +35230,10 @@ g1m_to_g1t_hashes = {
     "e63a3b25": {
         "g1t": "2e97b7f6",
         "kidsobjdb": "8f2a21cf.kidsobjdb"
+    },
+    "e640cdf0": {
+        "g1t": "2f637e8b",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "e6416cf0": {
         "g1t": "2f76bf8b",
@@ -35164,6 +35591,10 @@ g1m_to_g1t_hashes = {
         "g1t": "73fc903a",
         "kidsobjdb": "2cd583b5.kidsobjdb"
     },
+    "e8775294": {
+        "g1t": "73fd8e67",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e87e0c58": {
         "g1t": "74ce0d23",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -35284,6 +35715,10 @@ g1m_to_g1t_hashes = {
         "g1t": "8fc20c45",
         "kidsobjdb": "fff123d9.kidsobjdb"
     },
+    "e96046e8": {
+        "g1t": "90332493",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "e96060d6": {
         "g1t": "90364865",
         "kidsobjdb": "8f2a21cf.kidsobjdb"
@@ -35343,6 +35778,10 @@ g1m_to_g1t_hashes = {
     "e9beb455": {
         "g1t": "9ba264c6",
         "kidsobjdb": "398598b9.kidsobjdb"
+    },
+    "e9c18d66": {
+        "g1t": "9bfaadd5",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "e9c3ac1f": {
         "g1t": "9c3c663c",
@@ -35559,6 +35998,10 @@ g1m_to_g1t_hashes = {
     "eb68335b": {
         "g1t": "cf28c680",
         "kidsobjdb": "896f1e4e.kidsobjdb"
+    },
+    "eb686dde": {
+        "g1t": "cf2fdc5d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "eb74e660": {
         "g1t": "d0b2741b",
@@ -36084,6 +36527,10 @@ g1m_to_g1t_hashes = {
         "g1t": "48772fcb",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "ef6719b0": {
+        "g1t": "4b06aacb",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "ef6a6802": {
         "g1t": "4b6d26b9",
         "kidsobjdb": "2cd583b5.kidsobjdb"
@@ -36143,6 +36590,10 @@ g1m_to_g1t_hashes = {
     "efc8ab1d": {
         "g1t": "8c34bf57",
         "kidsobjdb": "b2823bcc.kidsobjdb"
+    },
+    "efcccaae": {
+        "g1t": "5757198d",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "efd03ca6": {
         "g1t": "57c1e695",
@@ -36215,6 +36666,10 @@ g1m_to_g1t_hashes = {
     "f033e875": {
         "g1t": "63d3b4a6",
         "kidsobjdb": "31fdd8f4.kidsobjdb"
+    },
+    "f0398c58": {
+        "g1t": "64828d23",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "f03bc932": {
         "g1t": "64c7eb89",
@@ -37076,6 +37531,10 @@ g1m_to_g1t_hashes = {
         "g1t": "060ecbba",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
     },
+    "f5821b7f": {
+        "g1t": "084be2dc",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "f58731e4": {
         "g1t": "08e99917",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -37556,6 +38015,10 @@ g1m_to_g1t_hashes = {
         "g1t": "73f72666",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
+    "f905784d": {
+        "g1t": "75341fce",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "f90f9109": {
         "g1t": "e97974de",
         "kidsobjdb": "bf74ad2a.kidsobjdb"
@@ -37912,6 +38375,10 @@ g1m_to_g1t_hashes = {
         "g1t": "b8ea930c",
         "kidsobjdb": "fff123d9.kidsobjdb"
     },
+    "fb38883b": {
+        "g1t": "b9630da0",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "fb44208b": {
         "g1t": "baca7f50",
         "kidsobjdb": "CharacterEditor.kidssingletondb"
@@ -38204,6 +38671,10 @@ g1m_to_g1t_hashes = {
         "g1t": "b478abdb",
         "kidsobjdb": "edf72518.kidsobjdb"
     },
+    "fd2b2452": {
+        "g1t": "f5c3f469",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "fd35b411": {
         "g1t": "f70b5c8a",
         "kidsobjdb": "1a8d2732.kidsobjdb"
@@ -38396,6 +38867,10 @@ g1m_to_g1t_hashes = {
         "g1t": "7aca0a79",
         "kidsobjdb": "a7bb9c17.kidsobjdb"
     },
+    "fe13b8f2": {
+        "g1t": "11edf3c9",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
+    },
     "fe1c9ed8": {
         "g1t": "1301caa3",
         "kidsobjdb": "2ee322d5.kidsobjdb"
@@ -38459,6 +38934,10 @@ g1m_to_g1t_hashes = {
     "fe847679": {
         "g1t": "157dfe47",
         "kidsobjdb": "f3612a90.kidsobjdb"
+    },
+    "fe8c46d6": {
+        "g1t": "20872265",
+        "kidsobjdb": "CharacterEditor.kidssingletondb"
     },
     "fe941c36": {
         "g1t": "2179f905",

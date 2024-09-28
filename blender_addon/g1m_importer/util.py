@@ -159,6 +159,48 @@ def duplicate_object(ob):
     bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((0, 0, 0), (0, 0, 0), (0, 0, 0)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
     return bpy.context.view_layer.objects.active
 
+
+def keys_to_ints(d):
+    return {k.isdecimal() and int(k) or k:v for k,v in d.items()}
+def keys_to_strings(d):
+    return {str(k):v for k,v in d.items()}
+
+def update_vgmap_for_ob(obj, vg_step=1):
+    vgmaps = {k:keys_to_ints(v) for k,v in obj.items() if k.startswith('3DMigoto:VGMap:')}
+    if not vgmaps:
+        raise Exception('Selected object has no 3DMigoto vertex group maps')
+    for (suffix, vgmap) in vgmaps.items():
+        highest = max(vgmap.values())
+        for vg in obj.vertex_groups.keys():
+            if vg.isdecimal():
+                continue
+            if vg in vgmap:
+                continue
+            highest += vg_step
+            vgmap[vg] = highest
+            print('Assigned named vertex group %s = %i' % (vg, vgmap[vg]))
+        obj[suffix] = vgmap
+
+def update_vgmap(operator, context, vg_step=1):
+    if not context.selected_objects:
+        raise Exception('No object selected')
+
+    for obj in context.selected_objects:
+        vgmaps = {k:keys_to_ints(v) for k,v in obj.items() if k.startswith('3DMigoto:VGMap:')}
+        if not vgmaps:
+            raise Exception('Selected object has no 3DMigoto vertex group maps')
+        for (suffix, vgmap) in vgmaps.items():
+            highest = max(vgmap.values())
+            for vg in obj.vertex_groups.keys():
+                if vg.isdecimal():
+                    continue
+                if vg in vgmap:
+                    continue
+                highest += vg_step
+                vgmap[vg] = highest
+                operator.report({'INFO'}, 'Assigned named vertex group %s = %i' % (vg, vgmap[vg]))
+            obj[suffix] = vgmap
+
 def duplicate_g1m_object(arm, ob):
     meshes = [o for o in bpy.data.objects if o.type=="MESH" and o.parent == arm]
     metadata = json.loads(arm["metadata"])
@@ -281,7 +323,9 @@ def revert_after_export(arm, g1m):
                 vg.name = g1m.botw_bones.get(vg.name, vg.name)
 
     for ob in meshes:
-        for uvmap in ob.data.uv_layers:
+        ob["uvs"] = {}
+        for i, uvmap in enumerate(ob.data.uv_layers):
+            ob["uvs"][str(i)] = str(uvmap.name)
             uvmap.name = 'UVMap'
 
 def prepare_for_export(arm, g1m):
@@ -297,8 +341,9 @@ def prepare_for_export(arm, g1m):
             for vg in ob.vertex_groups:
                 vg.name = g1m.botw_bones_rev.get(vg.name, vg.name)
     for ob in meshes:
-        for uvmap in ob.data.uv_layers:
-            uvmap.name = 'TEXCOORD.xy'
+        for i, uvmap in enumerate(ob.data.uv_layers):
+            # uvmap.name = 'TEXCOORD.xy'
+            uvmap.name = ob["uvs"][str(i)]
 
 # from tqdm import tk
 def is_vgmap_correct(ob, vgmap):

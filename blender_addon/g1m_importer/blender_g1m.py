@@ -36,6 +36,7 @@ from bpy.types import Panel, Operator, PropertyGroup
 from bpy_extras.io_utils import unpack_list, ImportHelper, ExportHelper, axis_conversion
 from bpy.props import BoolProperty, StringProperty, CollectionProperty
 from bpy_extras.image_utils import load_image
+# from g1m_importer.G1M_classes import *
 from g1m_importer.g1m_exporter.g1m_export_meshes import parseG1M, parseG1MFile
 from g1m_importer.g1m_exporter.g1m_to_basic_gltf import G1M2glTFBinary, gltfData
 from g1m_importer.g1m_exporter.g1m_import_meshes import build_g1m_from_binary, get_skel_data_from_g1m
@@ -2866,41 +2867,7 @@ def apply_vgmap(operator, context, targets=None, filepath='', commit=False, reve
         else:
             operator.report({'INFO'}, 'Applied vgmap to %s' % obj.name)
 
-def update_vgmap_for_ob(obj, vg_step=1):
-    vgmaps = {k:keys_to_ints(v) for k,v in obj.items() if k.startswith('3DMigoto:VGMap:')}
-    if not vgmaps:
-        raise Fatal('Selected object has no 3DMigoto vertex group maps')
-    for (suffix, vgmap) in vgmaps.items():
-        highest = max(vgmap.values())
-        for vg in obj.vertex_groups.keys():
-            if vg.isdecimal():
-                continue
-            if vg in vgmap:
-                continue
-            highest += vg_step
-            vgmap[vg] = highest
-            print('Assigned named vertex group %s = %i' % (vg, vgmap[vg]))
-        obj[suffix] = vgmap
 
-def update_vgmap(operator, context, vg_step=1):
-    if not context.selected_objects:
-        raise Fatal('No object selected')
-
-    for obj in context.selected_objects:
-        vgmaps = {k:keys_to_ints(v) for k,v in obj.items() if k.startswith('3DMigoto:VGMap:')}
-        if not vgmaps:
-            raise Fatal('Selected object has no 3DMigoto vertex group maps')
-        for (suffix, vgmap) in vgmaps.items():
-            highest = max(vgmap.values())
-            for vg in obj.vertex_groups.keys():
-                if vg.isdecimal():
-                    continue
-                if vg in vgmap:
-                    continue
-                highest += vg_step
-                vgmap[vg] = highest
-                operator.report({'INFO'}, 'Assigned named vertex group %s = %i' % (vg, vgmap[vg]))
-            obj[suffix] = vgmap
 
 class ApplyVGMap(bpy.types.Operator, ImportHelper):
     """Apply vertex group map to the selected object"""
@@ -3293,250 +3260,8 @@ class IMAGE_OT_ReloadAllG1mImages(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class G1M_duplicate_mesh(bpy.types.Operator):
-    """Reload All Images from Disk"""
-    bl_idname = "object.duplicate_g1m_mesh"
-    bl_label = "Duplicate currently selected mesh"
-    bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        scene = context.scene
-        AocG1mExporter = scene.Aoc_G1m_Exporter
-        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        try:
-            cur_ob = bpy.context.view_layer.objects.active
-            if arm is not None and cur_ob.parent == arm:
-                duplicate_g1m_object(arm, cur_ob)
-                self.report({'INFO'}, f"Updated duplicated mesh: {cur_ob.name}")
-        except Exception as e:
-            print("ERROR: unable to duplicated mesh")
-            print(e)
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-
-        self.report({'INFO'}, "Preparing to duplicate mesh")
-        return self.execute(context)
-    
-class G1M_update_from_json_metadata(bpy.types.Operator):
-    """Reload All Images from Disk"""
-    bl_idname = "object.update_g1m_metadata"
-    bl_label = "Update currently selected g1m model metadata"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        scene = context.scene
-        AocG1mExporter = scene.Aoc_G1m_Exporter
-        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        if not arm or "metadata" not in arm:
-            return {'CANCELLED'}
-        # metadata = json.loads(arm["metadata"])
-        json_path = Path(arm["tex_dir"]) / f"metadata_{arm.name}.json"
-        if not json_path.exists():
-            self.report({'ERROR'}, f"Metadata file not found: {json_path}")
-            return {'CANCELLED'}
-        metadata = json.loads(json_path.read_text())
-        meshes = [o for o in bpy.data.objects if o.parent==arm and o.type=="MESH"]
-        update_meshes_from_metadata(meshes,metadata)
-        _, materials = get_section(metadata, "MATERIALS")
-        _, shaderparams = get_section(metadata, "SHADER_PARAMS")
-        _, bonepalettes = get_section(metadata, "JOINT_PALETTES")
-        arm["materials_count"] = int(materials["count"])
-        arm["shaderParams_count"] = int(shaderparams["count"])
-        arm["bonePalette_count"] = int(bonepalettes["count"])
-                
-        arm["metadata"] = json.dumps(metadata)
-        self.report({'INFO'}, f"Updated metadata for {arm.name}")
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-
-        self.report({'INFO'}, "Preparing to duplicate mesh")
-        return self.execute(context)
-
-class OBJECT_OT_G1M_Export(Operator):
-    bl_idname = "object.export_g1m"
-    bl_label = "Export G1M"
-    
-    flip_winding: BoolProperty(
-            name="Flip Winding Order",
-            description="Flip winding order during export (automatically set to match the import option)",
-            default=False,
-            )
-
-    flip_normal: BoolProperty(
-            name="Flip Normal",
-            description="Flip Normals during export (automatically set to match the import option)",
-            default=False,
-            )
-
-    flip_tangent: BoolProperty(
-            name="Flip Tangent",
-            description="Flip Tangents during export (automatically set to match the flip normals option)",
-            default=False,
-            )
-    
-    def execute(self, context):
-        AocG1mExporter = context.scene.Aoc_G1m_Exporter
-        dest_dir = Path(AocG1mExporter.destination_path)
-        context = bpy.context
-        g1m = G1Mmodel()
-        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        # if arm is None:
-        #     arm = next((o for o in bpy.data.objects if o.type=="ARMATURE" and "g1m_backup" in o), None)
-        if arm is None:
-            return {'CANCELLED'}
-        if AocG1mExporter.is_g1m_export:
-            prepare_for_export(arm, g1m)
-            update_vgs_for_meshes(arm)
-        
-        if AocG1mExporter.only_selected_objects:
-            meshes = [o for o in bpy.data.objects if o in context.selected_objects and o.parent==arm]
-        else:
-            meshes = [o for o in bpy.data.objects if  o.parent==arm]
-        g1m.meshes = meshes
-        g1m.g1m_hash = arm.name
-        g1m.g1m_data = arm["g1m_backup"]
-        g1m.ktid_dict = arm["ktid_dict"]
-        g1m.kidsob_dict = arm["kidsob_dict"]
-        g1m.metadata = json.loads(arm["metadata"])
-        vgmaps = json.loads(arm["vgmaps"])
-        # print(json.dumps(vgmaps, indent=4))
-        
-        temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
-        if AocG1mExporter.is_g1m_export:
-            # (dest_dir / f"metadata_{g1m.g1m_hash}.json").write_text(json.dumps(g1m.metadata, indent=4))
-            g1m.update_metadata_from_scene()
-            # g1m.prepare_meshes_for_export(vgmaps)
-            g1m.temp_path = temp_path
-            remove_dir_if_exists(temp_path)
-            temp_path.mkdir(parents=True, exist_ok=True)
-            for m in meshes:
-                update_vgmap_for_ob(m)
-                name = m.name.split(".")[0] if "." in m.name else m.name
-                vb_path = str(temp_path / f"{name}.vb")
-                ib_path = str(temp_path / f"{name}.ib")
-                fmt_path = str(temp_path / f"{name}.fmt")
-                ini_path = str(temp_path / f"{name}_generated.ini")
-                vgmap = export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
-                # if not is_vgmap_correct(m, vgmap):
-                #     print(f"ERROR: missing vg names in vgmap for {m.name}")
-                #     new_vgmap = generate_vgmap(m, vgmaps)
-                #     apply_vgmap(self, context, targets=[m], filepath=new_vgmap, rename=True, cleanup=True)
-                #     export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
-                    
-            for file in temp_path.glob("*.vb"):
-                newfile = file.with_suffix(".ib")
-                file.rename(newfile)
-            for file in temp_path.glob("*.vb0"):
-                newfile = file.with_suffix(".vb")
-                file.rename(newfile)
-            new_g1m_data = build_g1m_from_binary(g1m)
-            remove_dir_if_exists(temp_path)
-            dest_path = dest_dir / f"{g1m.g1m_hash}.g1m"
-            if dest_path.exists():
-                shutil.copyfile(str(dest_path), str(dest_path.with_suffix(".bak")))
-            dest_path.write_bytes(new_g1m_data)
-        
-            revert_after_export(arm, g1m)
-        
-        #textures
-        tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
-        dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
-        if AocG1mExporter.is_g1t_export:
-            print("tex_dir", tex_dir)
-            # dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
-            g1m.pack_g1ts(tex_dir, dest_tex_dir)
-        print('is ktid export', AocG1mExporter.is_ktid_export)
-        if AocG1mExporter.is_ktid_export:
-            g1m.ktid_name = arm["ktid_name"] if "ktid_name" in arm else "file"
-            g1m.save_ktid( dest_tex_dir, tex_dir)
-            #TODO ktid save
-        
-        self.report({'INFO'}, f"Exported {len(meshes)} into g1m file {g1m.g1m_hash}.g1m")
-
-        # Placeholder for actual export logic
-        # self.report({'INFO'}, f"Exporting {len(armatures)} armature(s)...")
-
-        return {'FINISHED'}
-
-class OBJECT_PT_AocExportPanel(Panel):
-    bl_label = "Age of Calamity G1M Export Tool"
-    bl_idname = "OBJECT_PT_Aoc_Export_Panel"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Tool'
-    
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        AocG1mExporter = scene.Aoc_G1m_Exporter
-        layout.label(text="AOC G1M Export")
-        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        try:
-            cur_ob = bpy.context.view_layer.objects.active
-            layout.separator() 
-            layout.label(text=f"Selected object: {cur_ob.name}")
-            layout.label(text=f"Indexes")
-            row = layout.row()
-            row.label(text=f"Material: {cur_ob['materialIndex']}")
-            row.label(text=f"ShaderParam: {cur_ob['shaderParamIndex']}")
-            row.label(text=f"BonePalette: {cur_ob['bonePaletteIndex']}")
-            # row = layout.row()
-            layout.prop(AocG1mExporter, "material_index", text="Material")
-            layout.prop(AocG1mExporter, "shaderparam_index", text="ShaderParam")
-            layout.prop(AocG1mExporter, "bonepalette_index", text="BonePalette")
-            layout.operator("object.update_meshes_indexes", text="Update Indexes")
-            layout.operator("object.duplicate_g1m_mesh", text="Duplicate mesh")
-            layout.separator() 
-        except:
-            cur_ob = None
-        
-        try:
-            s_obs = [o for o in context.selected_objects if o.type == 'MESH']
-            obs1 = cur_ob
-            obs2 = [o for o in s_obs if o != obs1][0]
-            if len(s_obs) == 2:
-                lv0 = len(obs2.vertex_groups)
-                # obs1 = s_obs[1]
-                lv1 = len(obs1.vertex_groups)
-                bones = [bone.name for bone in arm.pose.bones]
-                mismatched_strict = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
-                mismatched_bones = [vg for vg in obs2.vertex_groups if vg.name not in bones]
-                m_strict = "MISMATCHED" if mismatched_strict else "CORRECT"
-                m_bones = "MISMATCHED" if mismatched_bones else "CORRECT"
-                t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1}"
-                layout.label(text=t)
-                # if mismatched_strict or mismatched_bones:
-                if mismatched_strict: layout.label(text="strict: " + ", ".join([vg.name for vg in mismatched_strict]))
-                if mismatched_bones: layout.label(text="bones: " + ", ".join([vg.name for vg in mismatched_bones]))
-                layout.label(text=f"Strict: {m_strict} - Bones: {m_bones}")
-        except:
-            pass
-
-        layout.prop(AocG1mExporter, "directory_path", text="Dump Path")
-        # layout.operator("object.select_directory", text="Update")
-        layout.prop(AocG1mExporter, "destination_path")
-        # layout.operator("object.select_directory")
-        
-        layout.prop(AocG1mExporter, "g1ms_list", text="G1Ms")
-        
-        layout.operator("image.reload_all", text="Reload All Images")
-        if arm is not None:
-            layout.operator("object.update_g1m_metadata", text="Update metadata from json")
-        # update_directory_path(self, context, AocG1mExporter)
-        # Check if there is at least one armature
-        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
-        if arm is not None:
-            layout.label(text="Export options")
-            row= layout.row()
-            row.prop(AocG1mExporter, "is_g1m_export", text="G1m",)
-            row.prop(AocG1mExporter, "is_g1t_export", text="G1t")
-            row.prop(AocG1mExporter, "is_ktid_export", text="Ktid")
-            layout.prop(AocG1mExporter, "only_selected_objects", text="Only Selected Objects")
-            if AocG1mExporter.is_g1m_export or AocG1mExporter.is_g1t_export or AocG1mExporter.is_ktid_export:
-                layout.operator("object.export_g1m", text="Export")
-
+   
 def get_dump_path(self, context):
     return get_aoc_files_path_str()
 
@@ -3635,6 +3360,358 @@ class AocPath(PropertyGroup):
     )
 
 
+    
+class OBJECT_OT_UpdateMeshesIndexesMaterial(Operator):
+    bl_idname = "object.update_meshes_indexes_material"
+    bl_label = "Update Meshes Indexes: Material"
+    # directory: StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        print("Updating indexes material")
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                cur_ob["materialIndex"] = AocG1mExporter.material_index
+                # cur_ob["shaderParamIndex"] = AocG1mExporter.shaderparam_index
+                # cur_ob["bonePaletteIndex"] = AocG1mExporter.bonepalette_index
+                update_materials_after_index_update(arm)
+                update_json_file_metadata_from_scene(arm)
+                
+                self.report({'INFO'}, f"Updated Material indexes for {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to update indexes Material")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to update indexes: Material")
+        return self.execute(context)
+
+class OBJECT_OT_UpdateMeshesIndexesShaderParam(Operator):
+    bl_idname = "object.update_meshes_indexes_shaderparam"
+    bl_label = "Update Meshes Indexes: ShaderParam"
+    # directory: StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        print("Updating indexes ShaderParam")
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                # cur_ob["materialIndex"] = AocG1mExporter.material_index
+                cur_ob["shaderParamIndex"] = AocG1mExporter.shaderparam_index
+                # cur_ob["bonePaletteIndex"] = AocG1mExporter.bonepalette_index
+                update_materials_after_index_update(arm)
+                update_json_file_metadata_from_scene(arm)
+                
+                self.report({'INFO'}, f"Updated ShaderParam indexes for {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to update indexes ShaderParam")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to update indexes: ShaderParam")
+        return self.execute(context)
+
+class OBJECT_OT_UpdateMeshesIndexesBonePalette(Operator):
+    bl_idname = "object.update_meshes_indexes_bonepalette"
+    bl_label = "Update Meshes Indexes: BonePalette"
+    # directory: StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        print("Updating indexes BonePalette")
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                # cur_ob["materialIndex"] = AocG1mExporter.material_index
+                # cur_ob["shaderParamIndex"] = AocG1mExporter.shaderparam_index
+                cur_ob["bonePaletteIndex"] = AocG1mExporter.bonepalette_index
+                update_materials_after_index_update(arm)
+                update_json_file_metadata_from_scene(arm)
+                
+                self.report({'INFO'}, f"Updated BonePalette indexes for {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to update indexes BonePalette")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to update indexes: BonePalette")
+        return self.execute(context)
+
+
+class G1M_duplicate_mesh(bpy.types.Operator):
+    """Reload All Images from Disk"""
+    bl_idname = "object.duplicate_g1m_mesh"
+    bl_label = "Duplicate currently selected mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            if arm is not None and cur_ob.parent == arm:
+                duplicate_g1m_object(arm, cur_ob)
+                self.report({'INFO'}, f"Updated duplicated mesh: {cur_ob.name}")
+        except Exception as e:
+            print("ERROR: unable to duplicated mesh")
+            print(e)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to duplicate mesh")
+        return self.execute(context)
+
+class G1M_update_from_json_metadata(bpy.types.Operator):
+    """Reload All Images from Disk"""
+    bl_idname = "object.update_g1m_metadata"
+    bl_label = "Update currently selected g1m model metadata"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        if not arm or "metadata" not in arm:
+            return {'CANCELLED'}
+        # metadata = json.loads(arm["metadata"])
+        json_path = Path(arm["tex_dir"]) / f"metadata_{arm.name}.json"
+        if not json_path.exists():
+            self.report({'ERROR'}, f"Metadata file not found: {json_path}")
+            return {'CANCELLED'}
+        metadata = json.loads(json_path.read_text())
+        meshes = [o for o in bpy.data.objects if o.parent==arm and o.type=="MESH"]
+        update_meshes_from_metadata(meshes,metadata)
+        _, materials = get_section(metadata, "MATERIALS")
+        _, shaderparams = get_section(metadata, "SHADER_PARAMS")
+        _, bonepalettes = get_section(metadata, "JOINT_PALETTES")
+        arm["materials_count"] = int(materials["count"])
+        arm["shaderParams_count"] = int(shaderparams["count"])
+        arm["bonePalette_count"] = int(bonepalettes["count"])
+                
+        arm["metadata"] = json.dumps(metadata)
+        self.report({'INFO'}, f"Updated metadata for {arm.name}")
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        self.report({'INFO'}, "Preparing to duplicate mesh")
+        return self.execute(context)
+    
+    
+
+ 
+class OBJECT_OT_G1M_Export(Operator):
+    bl_idname = "object.export_g1m"
+    bl_label = "Export G1M"
+    
+    flip_winding: BoolProperty(
+            name="Flip Winding Order",
+            description="Flip winding order during export (automatically set to match the import option)",
+            default=False,
+            )
+
+    flip_normal: BoolProperty(
+            name="Flip Normal",
+            description="Flip Normals during export (automatically set to match the import option)",
+            default=False,
+            )
+
+    flip_tangent: BoolProperty(
+            name="Flip Tangent",
+            description="Flip Tangents during export (automatically set to match the flip normals option)",
+            default=False,
+            )
+    
+    def execute(self, context):
+        AocG1mExporter = context.scene.Aoc_G1m_Exporter
+        dest_dir = Path(AocG1mExporter.destination_path)
+        context = bpy.context
+        g1m = G1Mmodel()
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        # if arm is None:
+        #     arm = next((o for o in bpy.data.objects if o.type=="ARMATURE" and "g1m_backup" in o), None)
+        if arm is None:
+            return {'CANCELLED'}
+        if AocG1mExporter.is_g1m_export:
+            prepare_for_export(arm, g1m)
+            update_vgs_for_meshes(arm)
+        
+        if AocG1mExporter.only_selected_objects:
+            meshes = [o for o in bpy.data.objects if o in context.selected_objects and o.parent==arm]
+        else:
+            meshes = [o for o in bpy.data.objects if  o.parent==arm]
+        g1m.meshes = meshes
+        g1m.g1m_hash = arm.name
+        g1m.g1m_data = arm["g1m_backup"]
+        g1m.ktid_dict = arm["ktid_dict"]
+        g1m.kidsob_dict = arm["kidsob_dict"]
+        g1m.metadata = json.loads(arm["metadata"])
+        vgmaps = json.loads(arm["vgmaps"])
+        # print(json.dumps(vgmaps, indent=4))
+        
+        temp_path = Path(os.path.expandvars("%temp%")) / g1m.g1m_hash
+        if AocG1mExporter.is_g1m_export:
+            # (dest_dir / f"metadata_{g1m.g1m_hash}.json").write_text(json.dumps(g1m.metadata, indent=4))
+            g1m.update_metadata_from_scene()
+            # g1m.prepare_meshes_for_export(vgmaps)
+            g1m.temp_path = temp_path
+            remove_dir_if_exists(temp_path)
+            temp_path.mkdir(parents=True, exist_ok=True)
+            for m in meshes:
+                update_vgmap_for_ob(m)
+                name = m.name.split(".")[0] if "." in m.name else m.name
+                vb_path = str(temp_path / f"{name}.vb")
+                ib_path = str(temp_path / f"{name}.ib")
+                fmt_path = str(temp_path / f"{name}.fmt")
+                ini_path = str(temp_path / f"{name}_generated.ini")
+                vgmap = export_3dmigoto(self,  m, context, vb_path, ib_path, fmt_path, ini_path)
+                    
+            for file in temp_path.glob("*.vb"):
+                newfile = file.with_suffix(".ib")
+                file.rename(newfile)
+            for file in temp_path.glob("*.vb0"):
+                newfile = file.with_suffix(".vb")
+                file.rename(newfile)
+            new_g1m_data = build_g1m_from_binary(g1m)
+            remove_dir_if_exists(temp_path)
+            dest_path = dest_dir / f"{g1m.g1m_hash}.g1m"
+            if dest_path.exists():
+                shutil.copyfile(str(dest_path), str(dest_path.with_suffix(".bak")))
+            dest_path.write_bytes(new_g1m_data)
+        
+            revert_after_export(arm, g1m)
+        
+        #textures
+        tex_dir = Path(arm["tex_dir"]) #if "tex_dir" in arm else dest_dir / f"{g1m.g1m_hash}_textures"
+        dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
+        if AocG1mExporter.is_g1t_export:
+            print("tex_dir", tex_dir)
+            # dest_tex_dir = dest_dir  / f"{g1m.g1m_hash}_g1ts"
+            g1m.pack_g1ts(tex_dir, dest_tex_dir)
+        print('is ktid export', AocG1mExporter.is_ktid_export)
+        if AocG1mExporter.is_ktid_export:
+            g1m.ktid_name = arm["ktid_name"] if "ktid_name" in arm else "file"
+            g1m.save_ktid( dest_tex_dir, tex_dir)
+            #TODO ktid save
+        
+        self.report({'INFO'}, f"Exported {len(meshes)} into g1m file {g1m.g1m_hash}.g1m")
+
+        # Placeholder for actual export logic
+        # self.report({'INFO'}, f"Exporting {len(armatures)} armature(s)...")
+
+        return {'FINISHED'}
+
+class OBJECT_PT_AocExportPanel(Panel):
+    bl_label = "Age of Calamity G1M Export Tool"
+    bl_idname = "OBJECT_PT_Aoc_Export_Panel"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Tool'
+    
+    def draw(self, context):
+        BUTTON_WIDTH = 0.7
+        layout = self.layout
+        scene = context.scene
+        AocG1mExporter = scene.Aoc_G1m_Exporter
+        layout.label(text="AOC G1M Export")
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        try:
+            cur_ob = bpy.context.view_layer.objects.active
+            tmp = cur_ob['materialIndex'] #crash here if not g1m mesh
+            layout.separator() 
+            
+            box = layout.box()
+            box.label(text=f"Selected object: {cur_ob.name}")
+            box.label(text=f"Indexes")
+            row = box.row()
+            row.label(text=f"Material: {cur_ob['materialIndex']}")
+            row.label(text=f"ShaderParam: {cur_ob['shaderParamIndex']}")
+            row.label(text=f"BonePalette: {cur_ob['bonePaletteIndex']}")
+            row = box.row()
+            row.label(text="Material")
+            row.scale_x = BUTTON_WIDTH
+            row.prop(AocG1mExporter, "material_index", text="")
+            row.operator("object.update_meshes_indexes_material", text="Set")
+            row = box.row()
+            row.label(text="ShaderParam")
+            row.scale_x = BUTTON_WIDTH
+            row.prop(AocG1mExporter, "shaderparam_index", text="")
+            row.operator("object.update_meshes_indexes_shaderparam", text="Set")
+            row = box.row()
+            row.label(text="BonePalette")
+            row.scale_x = BUTTON_WIDTH
+            row.prop(AocG1mExporter, "bonepalette_index", text="")
+            row.operator("object.update_meshes_indexes_bonepalette", text="Set")
+            # layout.operator("object.update_meshes_indexes", text="Update Indexes")
+            layout.operator("object.duplicate_g1m_mesh", text="Duplicate mesh")
+            layout.separator() 
+        except Exception as e:
+            print(e)
+            cur_ob = None
+        
+        try:
+            s_obs = [o for o in context.selected_objects if o.type == 'MESH']
+            obs1 = cur_ob
+            obs2 = [o for o in s_obs if o != obs1][0]
+            if len(s_obs) == 2:
+                lv0 = len(obs2.vertex_groups)
+                # obs1 = s_obs[1]
+                lv1 = len(obs1.vertex_groups)
+                bones = [bone.name for bone in arm.pose.bones]
+                mismatched_strict = [vg for vg in obs2.vertex_groups if vg.name not in obs1.vertex_groups]
+                mismatched_bones = [vg for vg in obs2.vertex_groups if vg.name not in bones]
+                m_strict = "MISMATCHED" if mismatched_strict else "CORRECT"
+                m_bones = "MISMATCHED" if mismatched_bones else "CORRECT"
+                t = f"{obs2.name}: {lv0} - {obs1.name}: {lv1}"
+                layout.label(text=t)
+                # if mismatched_strict or mismatched_bones:
+                if mismatched_strict: layout.label(text="strict: " + ", ".join([vg.name for vg in mismatched_strict]))
+                if mismatched_bones: layout.label(text="bones: " + ", ".join([vg.name for vg in mismatched_bones]))
+                layout.label(text=f"Strict: {m_strict} - Bones: {m_bones}")
+        except:
+            pass
+
+        layout.prop(AocG1mExporter, "directory_path", text="Dump Path")
+        # layout.operator("object.select_directory", text="Update")
+        layout.prop(AocG1mExporter, "destination_path")
+        # layout.operator("object.select_directory")
+        
+        layout.prop(AocG1mExporter, "g1ms_list", text="G1Ms")
+        
+        layout.operator("image.reload_all", text="Reload All Images")
+        if arm is not None:
+            layout.operator("object.update_g1m_metadata", text="Update metadata from json")
+        # update_directory_path(self, context, AocG1mExporter)
+        # Check if there is at least one armature
+        arm = bpy.data.objects.get(AocG1mExporter.g1ms_list)
+        if arm is not None:
+            layout.label(text="Export options")
+            row= layout.row()
+            row.prop(AocG1mExporter, "is_g1m_export", text="G1m",)
+            row.prop(AocG1mExporter, "is_g1t_export", text="G1t")
+            row.prop(AocG1mExporter, "is_ktid_export", text="Ktid")
+            layout.prop(AocG1mExporter, "only_selected_objects", text="Only Selected Objects")
+            if AocG1mExporter.is_g1m_export or AocG1mExporter.is_g1t_export or AocG1mExporter.is_ktid_export:
+                layout.operator("object.export_g1m", text="Export")
+
+
+
 exporter_classes = [
     # AocPath,
     G1M_duplicate_mesh,
@@ -3643,7 +3720,10 @@ exporter_classes = [
     OBJECT_OT_SelectDirectory,
     OBJECT_OT_G1M_Export,
     OBJECT_PT_AocExportPanel,
-    G1M_update_from_json_metadata
+    G1M_update_from_json_metadata,
+    OBJECT_OT_UpdateMeshesIndexesMaterial,
+    OBJECT_OT_UpdateMeshesIndexesShaderParam,
+    OBJECT_OT_UpdateMeshesIndexesBonePalette
 ]
 
 register_classes = (

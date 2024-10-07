@@ -4,7 +4,7 @@ import sys
 import shutil
 import subprocess
 from pathlib import Path
-from PIL import Image
+# from PIL import Image
 
 def remove_dir_if_exists(path):
     x = Path(path)
@@ -45,8 +45,33 @@ class G1T_Emm_Converter():
         # p = subprocess.run(c,  check=check)
         return p.returncode
 
+    def convert_to_black_png(self, input_image, output_image):
+        input_image = Path(input_image)
+        shutil.copyfile(input_image, output_image)
+        return
+        
+        tmp = Path(os.path.expandvars("%TEMP%/texconv"))
+        remove_dir_if_exists(tmp)
+        
+        # texconv command to convert the image to pitch black (0,0,0) pixels
+        command = [
+            self.texconv,            # Path to texconv executable
+            "-ft", "png",         # Convert to PNG format
+            "-o", tmp,  # Output directory
+            # "-px", "black_",      # Prefix for the output file
+            input_image           # Input image
+        ]
+
+        self.run(command)
+        result_file = tmp / (input_image.stem + ".png")
+        shutil.move(result_file, output_image)
+        remove_dir_if_exists(tmp)
+
     def dds_to_png(self, dds, dest_path):
         dds = Path(dds)
+        if dds.name.lower().endswith(".png"):
+            shutil.copyfile(dds, dest_path)
+            return
         tmp = Path(os.path.expandvars("%TEMP%/texconv"))
         remove_dir_if_exists(tmp)
         tmp.mkdir(parents=True, exist_ok=True)
@@ -92,6 +117,10 @@ class G1T_Emm_Converter():
         else:
             g1t_hash = g1t
         clean_g1t_path = self.get_g1t_path(g1t_hash)
+        if isinstance(im_path, bytes):
+            rawdata = bytes(im_path)
+            im_path = self.tmp / "new.dds"
+            im_path.write_bytes(rawdata)
         im_path = Path(im_path)
         if im_path.name.lower().endswith(".dds"):
             slice1 = self.tmp / "new.png"
@@ -100,11 +129,13 @@ class G1T_Emm_Converter():
             slice1 = im_path
         
         #create slice2
+        print("Creating slice2")
         slice2 = str(self.tmp / "slice2.png")
-        with Image.open(slice1) as im1:
-            w, h = im1.size
-            im2 = Image.new("RGB", (w, h), (0, 0, 0))
-            im2.save(slice2)
+        self.convert_to_black_png(slice1, slice2)
+        # with Image.open(slice1) as im1:
+        #     w, h = im1.size
+        #     im2 = Image.new("RGB", (w, h), (0, 0, 0))
+        #     im2.save(slice2)
 
         #run gust
         g1t_path = self.tmp / clean_g1t_path.name
@@ -117,6 +148,7 @@ class G1T_Emm_Converter():
 
             
         #Create array
+        print("Creating array")
         command = [
             self.texassemble, 
             'array', 
@@ -127,6 +159,7 @@ class G1T_Emm_Converter():
         ]
         self.run(command, check=True)
         #Generate mips
+        print("Generate mips")
         command = [
             self.nvtt_export, 
             '-f', 'bc7', 

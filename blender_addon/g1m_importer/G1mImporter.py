@@ -9,6 +9,7 @@ from g1m_importer.G1t import G1T
 from g1m_importer.g1m_exporter.g1m_export_meshes import *
 import hashlib
 from g1m_importer.util import *
+from g1m_importer.G1T_emm_lib import G1T_Emm_Converter
 from g1m_importer.G1M_to_G1T_hashes import *
 from g1m_importer.KtidsKidsobs import *
 import shutil
@@ -18,6 +19,8 @@ import io, bpy
 
 class G1Mmodel():
     def __init__(self) -> None:
+        conv = G1T_Emm_Converter()
+        self.emm_converter = conv if conv.is_valid() else None        
         self.path: Path = None
         self.g1m_hash = None
         self.g1m_data = None
@@ -134,6 +137,7 @@ class G1Mmodel():
             #     for _ in range(len(g1t_dds_files) - len(g1t.dds)):
             #         g1t.dds.append(b"")
             is_saved = False
+            is_emm = any([e.stem.lower().startswith("emm") for e in g1t_dds_files])
             for dds_file in g1t_dds_files:
                 dds_data = dds_file.read_bytes()
                 md5 = md5_bytes(dds_data)
@@ -145,15 +149,26 @@ class G1Mmodel():
                     except:
                         print(f"Error processing: {dds_file.name} - {ind}")
             if is_saved:
-                g1ts.append(g1t)
+                g1ts.append((g1t, is_emm))
         if g1ts:
             dest_dir.mkdir(parents=True, exist_ok=True)
-            for g1t in g1ts:
-                try:
-                    g1t.save_file(dest_dir / f"{g1t.Hash}.g1t")
-                    print(f"Saved G1T: {g1t.Hash}")
-                except Exception as e:
-                    print(f"Error saving G1T: {g1t.Hash}, skipping - {e}")
+            for g1t, is_emm  in g1ts:
+                dest_g1t = dest_dir / f"{g1t.Hash}.g1t"
+                clean_g1t_path = self.emm_converter.get_g1t_path(g1t.Hash) if self.emm_converter is not None else None
+                print(is_emm, self.emm_converter.is_valid(), clean_g1t_path)
+               
+                if is_emm and clean_g1t_path is not None and self.emm_converter.is_g1t_dds_arr(clean_g1t_path):
+                    try:
+                        self.emm_converter.convert_g1t_from_image(g1t.dds[0], clean_g1t_path, dest_g1t)
+                        print(f"Saved G1T: {g1t.Hash} as EMM")
+                    except Exception as e:
+                        print(f"Error saving G1T EMM: {g1t.Hash}, skipping - {e}")
+                else:
+                    try:
+                        g1t.save_file(dest_g1t)
+                        print(f"Saved G1T: {g1t.Hash}")
+                    except Exception as e:
+                        print(f"Error saving G1T: {g1t.Hash}, skipping - {e}")
                     
         
             
@@ -456,9 +471,8 @@ class G1Mmodel():
             # col.objects.link(ob)
             add_armature_modifier(ob, self.arm)
             ob.parent = self.arm
-            ob["uvs"] = {}
-            for i, uvmap in enumerate(ob.data.uv_layers):
-                ob["uvs"][str(i)] = str(uvmap.name)
+            
+            for uvmap in ob.data.uv_layers:
                 uvmap.name = 'UVMap'
         self.arm.scale = (0.01, 0.01, 0.01)
         # For single bones armatures created by parse_skeleton

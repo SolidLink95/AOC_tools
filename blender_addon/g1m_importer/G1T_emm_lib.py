@@ -4,7 +4,10 @@ import sys
 import shutil
 import subprocess
 from pathlib import Path
-# from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    pass
 
 def remove_dir_if_exists(path):
     x = Path(path)
@@ -131,11 +134,14 @@ class G1T_Emm_Converter():
         #create slice2
         print("Creating slice2")
         slice2 = str(self.tmp / "slice2.png")
-        self.convert_to_black_png(slice1, slice2)
-        # with Image.open(slice1) as im1:
-        #     w, h = im1.size
-        #     im2 = Image.new("RGB", (w, h), (0, 0, 0))
-        #     im2.save(slice2)
+        #self.convert_to_black_png(slice1, slice2)
+        try:
+            with Image.open(slice1) as im1:
+                w, h = im1.size
+                im2 = Image.new("RGB", (w, h), (0, 0, 0))
+                im2.save(slice2)
+        except:
+            shutil.copyfile(slice1, slice2)
 
         #run gust
         g1t_path = self.tmp / clean_g1t_path.name

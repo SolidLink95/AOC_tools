@@ -62,4 +62,5 @@
 /py/*/*/target
 /py/*/*/.venv
 *pycache*
+*__pycache__*
 /blender_addon/g1m_importer/__pycache__
